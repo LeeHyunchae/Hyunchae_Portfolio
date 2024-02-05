@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//Get이 앞에 붙는 함수는 반드시 무언가를 반환할것
+
 public class ParallaxScrollingController : MonoBehaviour
 {
     [SerializeField] Sprite[] sprites;
@@ -58,6 +60,7 @@ public class ParallaxScrollingController : MonoBehaviour
         speedRate = objectSprites[0].sortingOrder;
     }
 
+    //해당 함수같은 경우 Get 보다는 Calcurate가 맞음
     private void GetBiggerSpriteSize()
     {
         int count = sprites.Length;
@@ -84,11 +87,6 @@ public class ParallaxScrollingController : MonoBehaviour
 
         for(int i = 0; i<objectTMs.Length;i++)
         {
-            if(i == 0)
-            {
-                Debug.Log(curPosX);
-            }
-
             objectTMs[i].localPosition = new Vector2(curPosX,0);
             curPosX += biggerSpriteSize;
         }

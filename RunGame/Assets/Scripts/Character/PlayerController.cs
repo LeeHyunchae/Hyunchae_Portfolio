@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Translate 제거하기 transform 직접 작동하기
+
 public enum PlayerState
 {
     IDLE = 0,
@@ -14,10 +16,9 @@ public class PlayerController : MonoBehaviour
 {
     private Animator anim;
     private const string PLAYERSTATE = "PlayerState";
-    private const float GRAVITY = 0.49f;
+    private const float GRAVITY = 0.15f;
     private const float LONGJUMPPOWER = 0.125f;
-    private const int GROUNDSPRITESIZE = 16;
-    private const float AABBHEIGHTLIMIT = 0.5f;
+    private const float PLAYERHALFSIZE = 0.5f;
 
     private bool isGrounded;
 
@@ -29,67 +30,46 @@ public class PlayerController : MonoBehaviour
 
     private SpriteRenderer playerSpriteRenderer;
     private Transform playerTM;
-    public Transform groundTM;
+    public Floor floor;
 
-    private float playerHalfWidth;
-    private float playerHalfHeight;
-    private float playerPivotY;
-
-    private float groundHalfWidth;
-    private float groundHalfHeight;
-    private float groundSpritePivotY;
-
-    private void Awake()
+    
+    public void SetPlayer(GameObject _player)
     {
-        anim = GetComponent<Animator>();
+        anim = _player.GetComponent<Animator>();
         state = PlayerState.IDLE;
 
-        playerTM = GetComponent<Transform>();
-        playerSpriteRenderer = GetComponent<SpriteRenderer>();
-
-        SetPlayerBoxSize();
-        SetCurGround(groundTM);
+        playerTM = _player.GetComponent<Transform>();
+        playerSpriteRenderer = _player.GetComponent<SpriteRenderer>();
 
     }
 
-    private void Update()
+    public void Update()
     {
-        //스타트
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            state = PlayerState.WALK;
-        }
-
         if (!isGrounded)
         {
             shortJumpPower -= GRAVITY * Time.deltaTime;
 
-            if(shortJumpPower < 0 && state != PlayerState.JUMPDOWN)
+            if (shortJumpPower < 0 && state != PlayerState.JUMPDOWN)
             {
                 ChangeState(PlayerState.JUMPDOWN);
             }
 
         }
 
-        playerTM.Translate(0,shortJumpPower + curLongJumpPower,0);
+        playerTM.Translate(0, shortJumpPower + curLongJumpPower, 0);
 
         CheckGroundAABB();
 
-        //Debug.DrawLine(new Vector3(groundTM.position.x - groundHalfWidth,groundTM.position.y -( groundHalfHeight * (1 - groundSpritePivotY)), 1),
-        //    new Vector3(groundTM.position.x + groundHalfWidth, groundTM.position.y - (groundHalfHeight * (1 - groundSpritePivotY)), 1),Color.red);
-
-        //Debug.DrawLine(new Vector3(groundTM.position.x - groundHalfWidth, groundTM.position.y, 1),
-        //    new Vector3(groundTM.position.x + groundHalfWidth, groundTM.position.y, 1), Color.black);
 
         if (isGrounded && state != PlayerState.WALK)
         {
             shortJumpPower = 0;
             curLongJumpPower = 0;
-            playerTM.position = Vector2.zero;
+            playerTM.position = new Vector2(0, floor.GetTransform.position.y + floor.GetFloorHeight());
             ChangeState(PlayerState.WALK);
         }
 
-        if(Input.GetKeyDown(KeyCode.UpArrow))
+        if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             Jump();
         }
@@ -121,49 +101,42 @@ public class PlayerController : MonoBehaviour
         anim.SetInteger(PLAYERSTATE, (int)_state);
     }
 
-    private void SetPlayerBoxSize()
+    public void SetCurFloor(Floor _floor)
     {
-        playerHalfWidth = playerSpriteRenderer.bounds.extents.x;
-        playerHalfHeight = playerSpriteRenderer.bounds.extents.y;
-        playerPivotY = playerSpriteRenderer.sprite.pivot.y / playerSpriteRenderer.sprite.rect.height;
-        
-    }
-
-    private void SetCurGround(Transform _ground)
-    {
-        groundTM = _ground;
-        int groundCount = groundTM.childCount;
-        groundHalfWidth = groundCount * 0.5f;
-        //height 바꿔야함
-        groundHalfHeight = 0;
-        groundSpritePivotY = 1 / GROUNDSPRITESIZE;
+        floor = _floor;
     }
 
     private void CheckGroundAABB()
     {
-        if(shortJumpPower > 0)
+        if(shortJumpPower > 0 || floor == null)
         {
             isGrounded = false;
             return;
         }
 
         Vector2 playerPos = playerTM.position;
-        Vector2 groundPos = groundTM.position;
+        Vector2 floorPos = floor.GetTransform.position;
 
-        //playerPos.y -= playerHalfHeight * (1 - playerPivotY);
-        //groundPos.y -= groundHalfHeight * (1 - groundSpritePivotY);
 
-        // 두 사각형의 중심 간의 거리 계산
-        float deltaX = Mathf.Abs(playerPos.x - groundPos.x);
-        float deltaY = Mathf.Abs(playerPos.y - groundPos.y);
+        if(floorPos.x - floor.GetFloorWidth() * 0.5 < playerPos.x + PLAYERHALFSIZE &&
+            floorPos.x + floor.GetFloorWidth() * 0.5f > playerPos.x - PLAYERHALFSIZE &&
+            floorPos.y - floor.GetFloorHeight() * 0.5f < playerPos.y + PLAYERHALFSIZE &&
+            floorPos.y + floor.GetFloorHeight() * 0.5f >= playerPos.y - PLAYERHALFSIZE)
+        {
+            isGrounded = true;
+            Debug.Log("충돌");
+            
+        }
+        else
+        {
+            isGrounded = false;
+            Debug.Log("비충돌");
 
-        // 각 축별로 겹치는지 여부 확인
-        isGrounded = deltaX < (playerHalfWidth + groundHalfWidth);
-        isGrounded &= deltaY < (playerHalfHeight + groundHalfHeight);
+        }
+    }
 
-        isGrounded &= playerPos.y > groundPos.y - AABBHEIGHTLIMIT;
-
-        // 양 축 모두 겹치면 충돌이 발생한 것으로 간주
-       
+    public Vector2 GetPlayerPos()
+    {
+        return playerTM.position;
     }
 }
