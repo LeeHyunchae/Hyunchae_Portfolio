@@ -2,54 +2,61 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-//크리에이트 플레이어, 플로어 각각의 컨트롤러가 하도록 넘기기
-//루프문에서 랜덤액세스 3회이상이면 캐싱해주기
-//스프라이트 래핑모드는 리핏으로 바꿔주기
+//랜덤액세스 3회이상이면 캐싱해주기
 
 public class InGameSceneController : MonoBehaviour
 {
-    private const string PLAYERPATH = "Prefabs/Player";
-    private const string FLOORPATH = "Prefabs/Floor";
-    private const int FLOORCOUNT = 10;
-
     private PlayerController playerCtrl;
     private FloorController floorCtrl;
+    private ObstacleController obstacleCtrl;
 
     private void Awake()
     {
-        CreatePlayer();
-        CreateFloor();
+        InitPlayerCtrl();
+        InitFloorCtrl();
+        InitObstacleCtrl();
+        SetFirstObstacle();
     }
 
     private void Update()
     {
         playerCtrl.Update();
         floorCtrl.Update();
-
-        if(floorCtrl.GetFrontFloor() != null)
-        {
-            playerCtrl.SetCurFloor(floorCtrl.GetFrontFloor());
-        }
-
+        obstacleCtrl.Update();
     }
 
-    private void CreatePlayer()
+    private void InitPlayerCtrl()
     {
         playerCtrl = new PlayerController();
-        playerCtrl.SetPlayer(Instantiate<GameObject>((GameObject)Resources.Load(PLAYERPATH), Vector2.zero, Quaternion.identity));
+        playerCtrl.Init();
     }
 
-    private void CreateFloor()
+    private void InitFloorCtrl()
     {
-        GameObject originFloor = (GameObject)Resources.Load(FLOORPATH);
-        GameObject[] floors = new GameObject[FLOORCOUNT];
+        floorCtrl = new FloorController();
+        floorCtrl.OnChaneCurFloor = ChangeCurFloor;
+        floorCtrl.Init();
+    }
 
+    private void ChangeCurFloor(Floor _curFloor)
+    {
+        playerCtrl.SetCurFloor(_curFloor);
+    }
 
-        for(int i = 0; i<FLOORCOUNT;i++)
-        {
-            floors[i] = Instantiate<GameObject>(originFloor, Vector2.zero, Quaternion.identity);
-        }
+    private void InitObstacleCtrl()
+    {
+        obstacleCtrl = new ObstacleController();
+        obstacleCtrl.OnChangeCurObstacle = ChangeCurObstacle;
+        obstacleCtrl.Init(floorCtrl);
+    }
 
-        floorCtrl = new FloorController(floors);
+    private void ChangeCurObstacle(Obstacle _obstacle)
+    {
+
+    }
+
+    private void SetFirstObstacle()
+    {
+        obstacleCtrl.InitFirstObstacle(floorCtrl.GetAllfFloor());
     }
 }

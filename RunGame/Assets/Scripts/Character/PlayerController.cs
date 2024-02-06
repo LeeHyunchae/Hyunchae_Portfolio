@@ -2,8 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Translate 제거하기 transform 직접 작동하기
-
 public enum PlayerState
 {
     IDLE = 0,
@@ -17,30 +15,38 @@ public class PlayerController : MonoBehaviour
     private Animator anim;
     private const string PLAYERSTATE = "PlayerState";
     private const float GRAVITY = 0.15f;
-    private const float LONGJUMPPOWER = 0.125f;
+    private const float LONGJUMPPOWER = 0.1f;
     private const float PLAYERHALFSIZE = 0.5f;
+    private const string PLAYERPATH = "Prefabs/Player";
+    private const float PLAYER_HEIGHT_COLLECTION_VALUE = 0.1f;
+    private const float FLOOR_HEIGHT_COLLECTION_VALUE = 0.4f;
 
     private bool isGrounded;
 
     private float shortJumpPower = 0;
-    private float shortJumpHeight = 0.125f;
+    private float shortJumpHeight = 0.1f;
     private float curLongJumpPower = 0;
+    private float floorWidth = 0;
+    private float floorHeight = 0;
 
     private PlayerState state;
 
-    private SpriteRenderer playerSpriteRenderer;
     private Transform playerTM;
     public Floor floor;
+    private Vector2 playerPos;
 
+    public void Init()
+    {
+        SetPlayer(Instantiate<GameObject>((GameObject)Resources.Load(PLAYERPATH), Vector2.zero, Quaternion.identity));
+    }
     
-    public void SetPlayer(GameObject _player)
+    private void SetPlayer(GameObject _player)
     {
         anim = _player.GetComponent<Animator>();
         state = PlayerState.IDLE;
 
         playerTM = _player.GetComponent<Transform>();
-        playerSpriteRenderer = _player.GetComponent<SpriteRenderer>();
-
+        playerPos = playerTM.position;
     }
 
     public void Update()
@@ -56,7 +62,9 @@ public class PlayerController : MonoBehaviour
 
         }
 
-        playerTM.Translate(0, shortJumpPower + curLongJumpPower, 0);
+        playerPos.y += shortJumpPower + curLongJumpPower;
+
+        playerTM.position = playerPos;
 
         CheckGroundAABB();
 
@@ -104,6 +112,8 @@ public class PlayerController : MonoBehaviour
     public void SetCurFloor(Floor _floor)
     {
         floor = _floor;
+        floorWidth = floor.GetFloorWidth();
+        floorHeight = floor.GetFloorHeight();
     }
 
     private void CheckGroundAABB()
@@ -117,21 +127,17 @@ public class PlayerController : MonoBehaviour
         Vector2 playerPos = playerTM.position;
         Vector2 floorPos = floor.GetTransform.position;
 
-
-        if(floorPos.x - floor.GetFloorWidth() * 0.5 < playerPos.x + PLAYERHALFSIZE &&
-            floorPos.x + floor.GetFloorWidth() * 0.5f > playerPos.x - PLAYERHALFSIZE &&
-            floorPos.y - floor.GetFloorHeight() * 0.5f < playerPos.y + PLAYERHALFSIZE &&
-            floorPos.y + floor.GetFloorHeight() * 0.5f >= playerPos.y - PLAYERHALFSIZE)
+        if (floorPos.x - floorWidth * 0.5 < playerPos.x + PLAYERHALFSIZE &&
+            floorPos.x + floorWidth * 0.5f > playerPos.x - PLAYERHALFSIZE &&
+            floorPos.y + floorHeight * FLOOR_HEIGHT_COLLECTION_VALUE < playerPos.y - PLAYERHALFSIZE + PLAYER_HEIGHT_COLLECTION_VALUE &&
+            floorPos.y + floorHeight * 0.5f >= playerPos.y - PLAYERHALFSIZE)
         {
             isGrounded = true;
-            Debug.Log("충돌");
             
         }
         else
         {
             isGrounded = false;
-            Debug.Log("비충돌");
-
         }
     }
 

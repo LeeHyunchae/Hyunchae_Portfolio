@@ -37,4 +37,9 @@ public class Floor
     {
         return 1;
     }
+
+    public int GetFloorMiddleSize()
+    {
+        return (int)floors[MIDDLE].size.x;
+    }
 }

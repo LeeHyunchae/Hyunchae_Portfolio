@@ -2,12 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-//Get이 앞에 붙는 함수는 반드시 무언가를 반환할것
-
 public class ParallaxScrollingController : MonoBehaviour
 {
-    [SerializeField] Sprite[] sprites;
-    [SerializeField] GameObject originObj;
+    [SerializeField] private Sprite[] sprites;
+    [SerializeField] private GameObject originObj;
 
     private const int OBJCOUNT = 20;
     private const int REPOSITIONPOINT = 20;
@@ -24,7 +22,7 @@ public class ParallaxScrollingController : MonoBehaviour
     private void Awake()
     {
         CreateScrollingObj();
-        GetBiggerSpriteSize();
+        CalculateBiggerSpriteSize();
 
         screenLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 0)).x;
 
@@ -40,7 +38,12 @@ public class ParallaxScrollingController : MonoBehaviour
     {
         for(int i = 0; i < OBJCOUNT;i++)
         {
-            objectTMs[i].Translate(speedRate * -1f * Time.deltaTime, 0,0);
+            int objIdx = i;
+            Vector2 objPos = objectTMs[objIdx].position;
+
+            objPos.x += speedRate * -1f * Time.deltaTime;
+
+            objectTMs[i].position = objPos;
 
             if(objectTMs[i].position.x <= screenLeft)
             {
@@ -53,15 +56,16 @@ public class ParallaxScrollingController : MonoBehaviour
     {
         for(int i = 0; i < OBJCOUNT;i++)
         {
-            objectTMs[i] = Instantiate<GameObject>(originObj,transform).GetComponent<Transform>();
-            objectSprites[i] = objectTMs[i].GetComponent<SpriteRenderer>();
-            objectSprites[i].sprite = sprites[Random.Range(0, sprites.Length)];
+            int objIdx = i;
+
+            objectTMs[objIdx] = Instantiate<GameObject>(originObj,transform).GetComponent<Transform>();
+            objectSprites[objIdx] = objectTMs[objIdx].GetComponent<SpriteRenderer>();
+            objectSprites[objIdx].sprite = sprites[Random.Range(0, sprites.Length)];
         }
         speedRate = objectSprites[0].sortingOrder;
     }
 
-    //해당 함수같은 경우 Get 보다는 Calcurate가 맞음
-    private void GetBiggerSpriteSize()
+    private void CalculateBiggerSpriteSize()
     {
         int count = sprites.Length;
 
