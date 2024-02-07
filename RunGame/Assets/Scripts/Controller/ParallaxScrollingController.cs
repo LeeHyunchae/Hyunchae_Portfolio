@@ -38,14 +38,14 @@ public class ParallaxScrollingController : MonoBehaviour
     {
         for(int i = 0; i < OBJCOUNT;i++)
         {
-            int objIdx = i;
-            Vector2 objPos = objectTMs[objIdx].position;
+            Transform objTM = objectTMs[i];
+            Vector2 objPos = objTM.position;
 
             objPos.x += speedRate * -1f * Time.deltaTime;
 
-            objectTMs[i].position = objPos;
+            objTM.position = objPos;
 
-            if(objectTMs[i].position.x <= screenLeft)
+            if(objTM.position.x <= screenLeft)
             {
                 RepositionObject(i);
             }
@@ -56,12 +56,11 @@ public class ParallaxScrollingController : MonoBehaviour
     {
         for(int i = 0; i < OBJCOUNT;i++)
         {
-            int objIdx = i;
-
-            objectTMs[objIdx] = Instantiate<GameObject>(originObj,transform).GetComponent<Transform>();
-            objectSprites[objIdx] = objectTMs[objIdx].GetComponent<SpriteRenderer>();
-            objectSprites[objIdx].sprite = sprites[Random.Range(0, sprites.Length)];
+            objectTMs[i] = Instantiate<GameObject>(originObj,transform).GetComponent<Transform>();
+            objectSprites[i] = objectTMs[i].GetComponent<SpriteRenderer>();
+            objectSprites[i].sprite = sprites[Random.Range(0, sprites.Length)];
         }
+
         speedRate = objectSprites[0].sortingOrder;
     }
 

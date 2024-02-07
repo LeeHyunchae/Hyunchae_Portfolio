@@ -4,6 +4,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+// new Vector 지우기
+// 약어 수정하기
+// transform.position 가능하면 curPos같은걸로 캐싱해서 사용하기
+// Camera.main 피하기(캐싱해서 사용하기)
+// 수식 변수화하기
+// Rect 사용하기(AABB)
+// 플로어 관련 클래스들 구조 변경하기
+// 장애물 추가하기
+
 public class FloorController
 {
     private const int INITSPEED = 3;
@@ -20,6 +29,7 @@ public class FloorController
 
     private int lastFloorIdx = 0;
     private int frontFloorIdx = 0;
+    private float playerHalfSize = 0;
 
     public Action<Floor> OnChaneCurFloor;
     public Action<Floor> OnRepositionFloor;
@@ -33,14 +43,23 @@ public class FloorController
         InitFloorPos();
     }
 
+    public void SetSpeedRate(int _speed)
+    {
+        speedRate = _speed;
+    }
+
     private void CreateFloor()
     {
+        Transform floorParent = new GameObject("Floos").transform;
+
+        floorParent.transform.position = Vector2.zero;
+
         GameObject originFloor = (GameObject)Resources.Load(FLOORPATH);
         GameObject[] floorObjs = new GameObject[FLOORCOUNT];
 
         for (int i = 0; i < FLOORCOUNT; i++)
         {
-            floorObjs[i] = GameObject.Instantiate<GameObject>(originFloor, Vector2.zero, Quaternion.identity);
+            floorObjs[i] = GameObject.Instantiate<GameObject>(originFloor, Vector2.zero, Quaternion.identity,floorParent);
         }
 
         InitFloor(floorObjs);
@@ -70,26 +89,26 @@ public class FloorController
     {
         for (int i = 0; i < floorCount; i++)
         {
-            int floorIdx = i;
+            Floor floor = floors[i];
 
-            Vector2 floorPos = floors[floorIdx].GetTransform.position;
+            Vector2 floorPos = floor.GetTransform.position;
 
             floorPos.x += speedRate * -1f * Time.deltaTime;
 
-            floors[floorIdx].GetTransform.position = floorPos;
+            floor.GetTransform.position = floorPos;
 
-            if(CheckFrontFloor(floorIdx))
+            if(CheckFrontFloor(i))
             {
-                frontFloorIdx = (floorIdx + 1) % floorCount;
+                frontFloorIdx = (i + 1) % floorCount;
                 if(OnChaneCurFloor != null)
                 {
                     OnChaneCurFloor.Invoke(floors[frontFloorIdx]);
                 }
             }
 
-            if (CheckOutsideFloor(floorIdx))
+            if (CheckOutsideFloor(i))
             {
-                RepositionFloor(floorIdx);
+                RepositionFloor(i);
             }
         }
     }
@@ -151,7 +170,7 @@ public class FloorController
             return false;
         }
 
-        return floors[_idx].GetTransform.position.x + floors[_idx].GetFloorWidth() * 0.5f <= Vector2.zero.x;
+        return floors[_idx].GetTransform.position.x + floors[_idx].GetFloorWidth() * 0.5f + playerHalfSize <= Vector2.zero.x;
     }
 
     private bool CheckOutsideFloor(int _idx)
@@ -167,5 +186,10 @@ public class FloorController
     public Floor[] GetAllfFloor()
     {
         return floors;
+    }
+
+    public void SetPlayerHalfSize(float _halfSize)
+    {
+        playerHalfSize = _halfSize;
     }
 }

@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+//.. TODO :: baseclass
 public class Obstacle
 {
+    //.. TODO :: move to baseclass
     private SpriteRenderer obstacleSprite = new SpriteRenderer();
     private Transform _transform;
 
@@ -33,8 +36,4 @@ public class Obstacle
         obstacleSprite.sprite = _sprite;
     }
 
-    public void asd()
-    {
-        Debug.Log(obstacleSprite.sprite.name + " WIDTH = " + GetWidth() + " HEIGHT = " + GetHeight());
-    }
 }

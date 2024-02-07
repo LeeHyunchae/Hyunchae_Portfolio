@@ -10,7 +10,7 @@ public enum PlayerState
     JUMPDOWN = 3
 }
 
-public class PlayerController : MonoBehaviour
+public class PlayerController
 {
     private Animator anim;
     private const string PLAYERSTATE = "PlayerState";
@@ -28,16 +28,21 @@ public class PlayerController : MonoBehaviour
     private float curLongJumpPower = 0;
     private float floorWidth = 0;
     private float floorHeight = 0;
+    private float obsWidth = 0;
+    private float obsHeight = 0;
 
     private PlayerState state;
 
     private Transform playerTM;
-    public Floor floor;
+    private Floor curFloor;
+    private Obstacle curObstacle;
     private Vector2 playerPos;
+
+    public float GetPlayerHalfSize => PLAYERHALFSIZE;
 
     public void Init()
     {
-        SetPlayer(Instantiate<GameObject>((GameObject)Resources.Load(PLAYERPATH), Vector2.zero, Quaternion.identity));
+        SetPlayer(GameObject.Instantiate<GameObject>((GameObject)Resources.Load(PLAYERPATH), Vector2.zero, Quaternion.identity));
     }
     
     private void SetPlayer(GameObject _player)
@@ -67,13 +72,14 @@ public class PlayerController : MonoBehaviour
         playerTM.position = playerPos;
 
         CheckGroundAABB();
+        CheckObstacleAABB();
 
 
         if (isGrounded && state != PlayerState.WALK)
         {
             shortJumpPower = 0;
             curLongJumpPower = 0;
-            playerTM.position = new Vector2(0, floor.GetTransform.position.y + floor.GetFloorHeight());
+            playerTM.position = new Vector2(0, curFloor.GetTransform.position.y + curFloor.GetFloorHeight() * 0.5f + PLAYERHALFSIZE);
             ChangeState(PlayerState.WALK);
         }
 
@@ -111,21 +117,29 @@ public class PlayerController : MonoBehaviour
 
     public void SetCurFloor(Floor _floor)
     {
-        floor = _floor;
-        floorWidth = floor.GetFloorWidth();
-        floorHeight = floor.GetFloorHeight();
+        curFloor = _floor;
+        floorWidth = curFloor.GetFloorWidth();
+        floorHeight = curFloor.GetFloorHeight();
+    }
+
+    public void SetCurObstacle(Obstacle _obstacle)
+    {
+        curObstacle = _obstacle;
+        obsWidth = curObstacle.GetWidth();
+        obsHeight = curObstacle.GetHeight();
+
     }
 
     private void CheckGroundAABB()
     {
-        if(shortJumpPower > 0 || floor == null)
+        if(shortJumpPower > 0 || curFloor == null)
         {
             isGrounded = false;
             return;
         }
 
         Vector2 playerPos = playerTM.position;
-        Vector2 floorPos = floor.GetTransform.position;
+        Vector2 floorPos = curFloor.GetTransform.position;
 
         if (floorPos.x - floorWidth * 0.5 < playerPos.x + PLAYERHALFSIZE &&
             floorPos.x + floorWidth * 0.5f > playerPos.x - PLAYERHALFSIZE &&
@@ -138,6 +152,29 @@ public class PlayerController : MonoBehaviour
         else
         {
             isGrounded = false;
+        }
+    }
+
+    private void CheckObstacleAABB()
+    {
+        if(curObstacle == null || !curObstacle.GetActive)
+        {
+            return;
+        }
+
+        Vector2 playerPos = playerTM.position;
+        Vector2 obsPos = curObstacle.GetTransform.position;
+
+        if (obsPos.x - obsWidth * 0.5 < playerPos.x + PLAYERHALFSIZE &&
+            obsPos.x + obsWidth * 0.5f > playerPos.x - PLAYERHALFSIZE &&
+            obsPos.y - obsHeight * 0.5f < playerPos.y + PLAYERHALFSIZE  &&
+            obsPos.y + obsHeight * 0.5f >= playerPos.y - PLAYERHALFSIZE)
+        {
+            Debug.Log("장애물 충돌!!");
+        }
+        else
+        {
+            Debug.Log("안충돌~");
         }
     }
 

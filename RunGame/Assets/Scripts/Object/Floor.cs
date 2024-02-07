@@ -12,7 +12,7 @@ public class Floor
     private Transform _transform;
 
     public Transform GetTransform => _transform;
-
+    
     public void Init(GameObject _floorObj)
     {
         floors = _floorObj.GetComponentsInChildren<SpriteRenderer>();
@@ -33,7 +33,7 @@ public class Floor
         return (int)(floors[LEFT].size.x + floors[MIDDLE].size.x + floors[RIGHT].size.x);
     }
 
-    public int GetFloorHeight()
+    public float GetFloorHeight()
     {
         return 1;
     }

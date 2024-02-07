@@ -9,6 +9,7 @@ public class InGameSceneController : MonoBehaviour
     private PlayerController playerCtrl;
     private FloorController floorCtrl;
     private ObstacleController obstacleCtrl;
+    private int curSpeed = 3;
 
     private void Awake()
     {
@@ -16,13 +17,6 @@ public class InGameSceneController : MonoBehaviour
         InitFloorCtrl();
         InitObstacleCtrl();
         SetFirstObstacle();
-    }
-
-    private void Update()
-    {
-        playerCtrl.Update();
-        floorCtrl.Update();
-        obstacleCtrl.Update();
     }
 
     private void InitPlayerCtrl()
@@ -36,6 +30,26 @@ public class InGameSceneController : MonoBehaviour
         floorCtrl = new FloorController();
         floorCtrl.OnChaneCurFloor = ChangeCurFloor;
         floorCtrl.Init();
+        floorCtrl.SetPlayerHalfSize(playerCtrl.GetPlayerHalfSize);
+    }
+
+    private void Update()
+    {
+        playerCtrl.Update();
+        floorCtrl.Update();
+        obstacleCtrl.Update();
+
+        if(Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            UpSpeedRate();
+        }
+    }
+
+    private void UpSpeedRate()
+    {
+        curSpeed++;
+        floorCtrl.SetSpeedRate(curSpeed);
+        obstacleCtrl.SetSpeedRate(curSpeed);
     }
 
     private void ChangeCurFloor(Floor _curFloor)
@@ -48,11 +62,12 @@ public class InGameSceneController : MonoBehaviour
         obstacleCtrl = new ObstacleController();
         obstacleCtrl.OnChangeCurObstacle = ChangeCurObstacle;
         obstacleCtrl.Init(floorCtrl);
+        obstacleCtrl.SetPlayerHalfSize(playerCtrl.GetPlayerHalfSize);
     }
 
     private void ChangeCurObstacle(Obstacle _obstacle)
     {
-
+        playerCtrl.SetCurObstacle(_obstacle);
     }
 
     private void SetFirstObstacle()
