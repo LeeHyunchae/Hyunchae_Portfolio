@@ -10,12 +10,15 @@ public class InGameSceneController : MonoBehaviour
     private FloorController floorCtrl;
     private ObstacleController obstacleCtrl;
     private int curSpeed = 3;
+    private Camera mainCam;
 
     private void Awake()
     {
+        mainCam = Camera.main;
+
         InitPlayerCtrl();
-        InitFloorCtrl();
         InitObstacleCtrl();
+        InitFloorCtrl();
         SetFirstObstacle();
     }
 
@@ -29,8 +32,19 @@ public class InGameSceneController : MonoBehaviour
     {
         floorCtrl = new FloorController();
         floorCtrl.OnChaneCurFloor = ChangeCurFloor;
+        floorCtrl.OnRepositionFloor = OnRepositionFloor;
+        floorCtrl.SetScreenLeft(mainCam.ScreenToWorldPoint(new Vector3(0, 0, 0)).x);
         floorCtrl.Init();
         floorCtrl.SetPlayerHalfSize(playerCtrl.GetPlayerHalfSize);
+        
+    }
+    private void InitObstacleCtrl()
+    {
+        obstacleCtrl = new ObstacleController();
+        obstacleCtrl.OnChangeCurObstacle = ChangeCurObstacle;
+        obstacleCtrl.SetScreenLeft(mainCam.ScreenToWorldPoint(new Vector3(0, 0, 0)).x);
+        obstacleCtrl.Init();
+        obstacleCtrl.SetPlayerHalfSize(playerCtrl.GetPlayerHalfSize);
     }
 
     private void Update()
@@ -57,21 +71,19 @@ public class InGameSceneController : MonoBehaviour
         playerCtrl.SetCurFloor(_curFloor);
     }
 
-    private void InitObstacleCtrl()
-    {
-        obstacleCtrl = new ObstacleController();
-        obstacleCtrl.OnChangeCurObstacle = ChangeCurObstacle;
-        obstacleCtrl.Init(floorCtrl);
-        obstacleCtrl.SetPlayerHalfSize(playerCtrl.GetPlayerHalfSize);
-    }
-
-    private void ChangeCurObstacle(Obstacle _obstacle)
+    private void ChangeCurObstacle(FixedObstacle _obstacle)
     {
         playerCtrl.SetCurObstacle(_obstacle);
     }
 
     private void SetFirstObstacle()
     {
-        obstacleCtrl.InitFirstObstacle(floorCtrl.GetAllfFloor());
+        //obstacleCtrl.InitFirstObstacle(floorCtrl.GetAllfFloor());
     }
+
+    private void OnRepositionFloor(Floor _floor)
+    {
+        List<FixedObstacle> obstacles = obstacleCtrl.OnRepositionFloor(_floor);
+    }
+
 }

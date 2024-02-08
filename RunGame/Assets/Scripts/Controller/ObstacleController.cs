@@ -9,12 +9,16 @@ public class ObstacleController
     private const int INITSPEED = 3;
     private const string OBSTACLEPATH = "Prefabs/Obstacle";
     private const int OBSTACLECOUNT = 20;
-    private const int MINFLOORSIZE = 5;
+    private const int ONE_OBSTACLE_SIZE = 3;
+    private const int TWO_OBSTACLE_SIZE = 5;
+    private const int THREE_OBSTACLE_SIZE = 7;
     private const string SPRITEPATH = "Sprites/Obstacle_";
     private const int SPRITECOUNT = 4;
+    private const int FLOOR_WIDTH_CORRECTION = 1;
 
-    private Obstacle[] obstacles;
-    private Queue<Obstacle> standbyObstacles = new Queue<Obstacle>();
+    private FixedObstacle[] obstacles;
+    private Queue<FixedObstacle> standbyObstacles = new Queue<FixedObstacle>();
+    private List<FixedObstacle> rePosObstacleList = new List<FixedObstacle>(OBSTACLECOUNT);
 
     private Sprite[] sprites;
     private int obstacleCount;
@@ -25,15 +29,16 @@ public class ObstacleController
     private int frontObstacleIdx = 0;
     private float playerHalfSize = 0;
 
-    public Action<Obstacle> OnChangeCurObstacle;
+    private Transform obstacleParent;
 
-    
-    public void Init(FloorController _floorCtrl)
+    public Action<FixedObstacle> OnChangeCurObstacle;
+    public Action<FixedObstacle> OnRepositionObstacle;
+
+    public void SetScreenLeft(float _screenLeft) => screenLeft = _screenLeft;
+
+    public void Init()
     {
-        _floorCtrl.OnRepositionFloor = OnRepositionFloor;
         CreateObstacle();
-
-        screenLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 0)).x;
 
         InitObstacleSprites();
     }
@@ -65,7 +70,7 @@ public class ObstacleController
             OnRepositionFloor(_floors[i]);
         }
 
-        OnChangeCurObstacle.Invoke(obstacles[0]);
+        
     }
 
     public void SetSpeedRate(int _speed)
@@ -75,7 +80,7 @@ public class ObstacleController
 
     private void CreateObstacle()
     {
-        Transform obstacleParent = new GameObject("Obstacles").transform;
+        obstacleParent = new GameObject("Obstacles").transform;
 
         obstacleParent.transform.position = Vector2.zero;
 
@@ -88,24 +93,25 @@ public class ObstacleController
         }
 
         InitObstacles(obstacleObjs);
+        OnChangeCurObstacle.Invoke(obstacles[0]);
     }
 
     private void InitObstacles(GameObject[] _obstacles)
     {
         obstacleCount = _obstacles.Length;
 
-        obstacles = new Obstacle[obstacleCount];
+        obstacles = new FixedObstacle[obstacleCount];
 
         for (int i = 0; i < obstacleCount; i++)
         {
-            Obstacle obs = new Obstacle();
+            FixedObstacle obstacle = new FixedObstacle();
 
-            obs.Init(_obstacles[i]);
-            obs.SetActive(false);
+            obstacle.Init(_obstacles[i]);
+            obstacle.SetActive(false);
 
-            standbyObstacles.Enqueue(obs);
+            standbyObstacles.Enqueue(obstacle);
 
-            obstacles[i] = obs;
+            obstacles[i] = obstacle;
         }
     }
 
@@ -118,18 +124,18 @@ public class ObstacleController
     {
         for (int i = 0; i < obstacleCount; i++)
         {
-            Obstacle obs = obstacles[i];
+            FixedObstacle obstacle = obstacles[i];
 
-            if(!obs.GetActive)
+            if(!obstacle.GetActive)
             {
                 continue;
             }
 
-            Vector2 pos = obs.GetTransform.position;
+            Vector2 pos = obstacle.GetTransform.position;
 
-            pos.x += speedRate * -1f * Time.deltaTime;
+            pos.x += (speedRate + obstacle.GetSpeedRate) * -1f * Time.deltaTime;
 
-            obs.GetTransform.position = pos;
+            obstacle.GetTransform.position = pos;
 
             if (CheckFrontObstacle(i))
             {
@@ -142,8 +148,8 @@ public class ObstacleController
 
             if(CheckOutsideObstacle(i))
             {
-                standbyObstacles.Enqueue(obs);
-                obs.SetActive(false);
+                standbyObstacles.Enqueue(obstacle);
+                obstacle.SetActive(false);
             }
         }
     }
@@ -166,40 +172,59 @@ public class ObstacleController
         return obstacles[_idx].GetTransform.position.x + obstacles[_idx].GetWidth() * 0.5f <= screenLeft;
     }
 
-    public Obstacle GetFrontFloor()
+    public FixedObstacle GetFrontFloor()
     {
         return obstacles[frontObstacleIdx];
     }
 
-    private void OnRepositionFloor(Floor _reposFloor)
+    public List<FixedObstacle> OnRepositionFloor(Floor _rePosFloor)
     {
         if(standbyObstacles.Count == 0)
         {
-            return;
+            return null;
         }
 
-        Floor floor = _reposFloor;
+        rePosObstacleList.Clear();
+
+        Floor floor = _rePosFloor;
 
         int size = floor.GetFloorMiddleSize();
 
-        if(size >= MINFLOORSIZE)
+        //if(size >= THREE_OBSTACLE_SIZE)
+        //{
+
+        //}
+        //else if(size >= TWO_OBSTACLE_SIZE)
+        //{
+
+        //}
+        //else
+        if(size >= ONE_OBSTACLE_SIZE)
         {
-            Obstacle obs = standbyObstacles.Dequeue();
+            FixedObstacle obstacle = standbyObstacles.Dequeue();
 
-            Vector2 obsPos = floor.GetTransform.position;
+            Vector2 obstaclePos = floor.GetTransform.position;
 
-            obs.SetSprite(sprites[Random.Range(0, SPRITECOUNT)]);
+            obstacle.SetSprite(sprites[Random.Range(0, SPRITECOUNT)]);
 
-            obsPos.x = obsPos.x + Random.Range(-(size * 0.5f) + obs.GetWidth() * 0.5f, size * 0.5f - obs.GetWidth() * 0.5f);
-            obsPos.y = floor.GetTransform.position.y + (floor.GetFloorHeight() * 0.5f) + (obs.GetHeight() * 0.5f);
+            int rndMinX = (int)(-(size * 0.5f) + obstacle.GetWidth() * 0.5f + FLOOR_WIDTH_CORRECTION);
+            int rndMaxX = (int)(size * 0.5f - obstacle.GetWidth() * 0.5f + FLOOR_WIDTH_CORRECTION);
+
+            int posX = (int)(obstaclePos.x + Random.Range(rndMinX,rndMaxX));
+            float posY = floor.GetTransform.position.y + (floor.GetFloorHeight() * 0.5f) + (obstacle.GetHeight() * 0.5f);
+
+            obstaclePos.x = posX;
+            obstaclePos.y = posY;
             
-            obs.GetTransform.position = obsPos;
+            obstacle.GetTransform.position = obstaclePos;
 
 
-            obs.SetActive(true);
+            obstacle.SetActive(true);
 
+            rePosObstacleList.Add(obstacle);
+        }
 
-        } 
+        return rePosObstacleList;
     }
 
     public void SetPlayerHalfSize(float _halfSize)

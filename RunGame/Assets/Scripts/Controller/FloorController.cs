@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-// new Vector 지우기
-// 약어 수정하기
+// new Vector 지우기 //
+// 약어 수정하기 //
 // transform.position 가능하면 curPos같은걸로 캐싱해서 사용하기
-// Camera.main 피하기(캐싱해서 사용하기)
-// 수식 변수화하기
+// Camera.main 피하기(캐싱해서 사용하기) //
+// 수식 변수화하기 //
 // Rect 사용하기(AABB)
 // 플로어 관련 클래스들 구조 변경하기
 // 장애물 추가하기
@@ -31,14 +31,16 @@ public class FloorController
     private int frontFloorIdx = 0;
     private float playerHalfSize = 0;
 
+    private Transform floorParent;
+
     public Action<Floor> OnChaneCurFloor;
     public Action<Floor> OnRepositionFloor;
+
+    public void SetScreenLeft(float _screenLeft) => screenLeft = _screenLeft;
     
     public void Init()
     {
         CreateFloor();
-
-        screenLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 0)).x;
 
         InitFloorPos();
     }
@@ -50,7 +52,7 @@ public class FloorController
 
     private void CreateFloor()
     {
-        Transform floorParent = new GameObject("Floos").transform;
+        floorParent = new GameObject("Floos").transform;
 
         floorParent.transform.position = Vector2.zero;
 
@@ -117,9 +119,12 @@ public class FloorController
     {
         floors[_index].SetMiddleSize(Random.Range(1, 10));
 
-        floors[_index].GetTransform.position =
-            new Vector2(floors[lastFloorIdx].GetTransform.position.x + floors[lastFloorIdx].GetFloorWidth() * 0.5f + MININTERVAL + floors[_index].GetFloorWidth() * 0.5f
-            ,Random.Range(-4, 4));
+        Vector2 floorPos = floors[_index].GetTransform.position;
+
+        floorPos.x = floors[lastFloorIdx].GetTransform.position.x + floors[lastFloorIdx].GetFloorWidth() * 0.5f + MININTERVAL + floors[_index].GetFloorWidth() * 0.5f;
+        floorPos.y = Random.Range(-4, 4);
+
+        floors[_index].GetTransform.position = floorPos;
 
         lastFloorIdx = _index;
 
