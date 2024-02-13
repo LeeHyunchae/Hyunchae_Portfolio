@@ -6,6 +6,7 @@ public class ParallaxScrollingController : MonoBehaviour
 {
     [SerializeField] private Sprite[] sprites;
     [SerializeField] private GameObject originObj;
+    public bool isRandomPosY = false;
 
     private const int OBJCOUNT = 20;
     private const int REPOSITIONPOINT = 20;
@@ -17,6 +18,7 @@ public class ParallaxScrollingController : MonoBehaviour
 
     private float screenLeft;
     private float maxPosX;
+    private float standardY;
 
 
     private void Awake()
@@ -31,6 +33,11 @@ public class ParallaxScrollingController : MonoBehaviour
         InitObjectsPos();
 
         maxPosX = biggerSpriteSize * OBJCOUNT + screenLeft;
+
+        if(isRandomPosY)
+        {
+            standardY = transform.position.y;
+        }
 
     }
 
@@ -90,14 +97,29 @@ public class ParallaxScrollingController : MonoBehaviour
 
         for(int i = 0; i<objectTMs.Length;i++)
         {
-            objectTMs[i].localPosition = new Vector2(curPosX,0);
+            if (isRandomPosY)
+            {
+                objectTMs[i].localPosition = new Vector2(curPosX, standardY + Random.Range(-2, 3));
+            }
+            else
+            {
+                objectTMs[i].localPosition = new Vector2(curPosX, 0);
+            }
+
             curPosX += biggerSpriteSize;
         }
     }
 
     private void RepositionObject(int _objIdx)
     {
-        objectTMs[_objIdx].localPosition = new Vector2(maxPosX, 0);
+        if(isRandomPosY)
+        {
+            objectTMs[_objIdx].localPosition = new Vector2(maxPosX, standardY + Random.Range(-2,3));
+        }
+        else
+        {
+            objectTMs[_objIdx].localPosition = new Vector2(maxPosX, 0);
+        }
         objectSprites[_objIdx].sprite = sprites[Random.Range(0, sprites.Length)];
     }
 }

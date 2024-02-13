@@ -10,6 +10,7 @@ public class InGameSceneController : MonoBehaviour
     private FloorController floorCtrl;
     private ObstacleController obstacleCtrl;
     private int curSpeed = 3;
+    private float flyObstacleInterval = 30f;
     private Camera mainCam;
 
     private void Awake()
@@ -41,8 +42,9 @@ public class InGameSceneController : MonoBehaviour
     private void InitObstacleCtrl()
     {
         obstacleCtrl = new ObstacleController();
-        obstacleCtrl.OnChangeCurObstacle = ChangeCurObstacle;
+        obstacleCtrl.OnChangeCurLandObstacle = ChangeCurObstacle;
         obstacleCtrl.SetScreenLeft(mainCam.ScreenToWorldPoint(new Vector3(0, 0, 0)).x);
+        obstacleCtrl.SetFlyObstacleInterval(flyObstacleInterval);
         obstacleCtrl.Init();
         obstacleCtrl.SetPlayerHalfSize(playerCtrl.GetPlayerHalfSize);
     }
@@ -71,7 +73,7 @@ public class InGameSceneController : MonoBehaviour
         playerCtrl.SetCurFloor(_curFloor);
     }
 
-    private void ChangeCurObstacle(FixedObstacle _obstacle)
+    private void ChangeCurObstacle(BaseObstacle _obstacle)
     {
         playerCtrl.SetCurObstacle(_obstacle);
     }
@@ -83,7 +85,7 @@ public class InGameSceneController : MonoBehaviour
 
     private void OnRepositionFloor(Floor _floor)
     {
-        List<FixedObstacle> obstacles = obstacleCtrl.OnRepositionFloor(_floor);
+        List<BaseObstacle> obstacles = obstacleCtrl.OnRepositionFloor(_floor);
     }
 
 }

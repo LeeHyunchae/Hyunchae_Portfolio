@@ -24,7 +24,7 @@ public class PlayerController
     private bool isGrounded;
 
     private float shortJumpPower = 0;
-    private float shortJumpHeight = 0.075f;
+    private float shortJumpHeight = 0.1f;
     private float curLongJumpPower = 0;
     private float floorWidth = 0;
     private float floorHeight = 0;
@@ -35,7 +35,7 @@ public class PlayerController
 
     private Transform playerTM;
     private Floor curFloor;
-    private FixedObstacle curObstacle;
+    private BaseObstacle curObstacle;
     private Vector2 playerPos;
 
     public float GetPlayerHalfSize => PLAYERHALFSIZE;
@@ -139,7 +139,7 @@ public class PlayerController
         floorHeight = curFloor.GetFloorHeight();
     }
 
-    public void SetCurObstacle(FixedObstacle _obstacle)
+    public void SetCurObstacle(BaseObstacle _obstacle)
     {
         curObstacle = _obstacle;
         obsWidth = curObstacle.GetWidth();
@@ -188,10 +188,6 @@ public class PlayerController
             obsPos.y + obsHeight * 0.5f >= playerPos.y - PLAYERHALFSIZE)
         {
             Debug.Log("장애물 충돌!!");
-        }
-        else
-        {
-            Debug.Log("안충돌~");
         }
     }
 

@@ -4,15 +4,65 @@ using UnityEngine;
 
 public class JumpObstacle : BaseObstacle
 {
+    private const float GRAVITY = 0.15f; 
+    private float jumpHeight = 0.1f;
+    private float jumpPower = 0;
+
+    private float jumpInterval = 0;
+    private float jumpTime = 0;
+    private bool isJumping = false;
+    private float posY;
+
     public override void Init(GameObject _obstacleObj)
     {
         base.Init(_obstacleObj);
         obstacleType = EObstacleType.JUMP;
+
+        jumpInterval = Random.Range(2, 3);
+
+        posY = _transform.position.y;
     }
 
     public override void Action()
     {
-        //점프하기
-        throw new System.NotImplementedException();
+        if(!obstacleSprite.enabled)
+        {
+            return;
+        }
+
+        if(!isJumping)
+        {
+            jumpTime += Time.deltaTime;
+        }
+        else if(isJumping)
+        {
+            jumpPower -= GRAVITY * Time.deltaTime;
+
+            posY += jumpPower;
+
+            _transform.localPosition = new Vector2(floorPosX,floorPosY + posY);
+        }
+
+        if(jumpTime >= jumpInterval && !isJumping)
+        {
+            jumpPower = jumpHeight;
+            isJumping = true;
+            jumpTime = 0;
+        }
+
+        if(_transform.position.y <= floorPosY && jumpPower < 0)
+        {
+            isJumping = false;
+            _transform.position = new Vector2(_transform.position.x, floorPosY);
+        }    
+
+    }
+
+    public override void SetFloorPosition(Vector2 _floorPos)
+    {
+        base.SetFloorPosition(_floorPos);
+        jumpInterval = Random.Range(1, 5);
+        jumpHeight = Random.Range(0.075f, 0.125f);
+
     }
 }
