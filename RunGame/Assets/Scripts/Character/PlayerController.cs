@@ -35,7 +35,7 @@ public class PlayerController
 
     private Transform playerTM;
     private Floor curFloor;
-    private BaseObstacle curObstacle;
+    private List<BaseObstacle> curObstacles;
     private Vector2 playerPos;
 
     public float GetPlayerHalfSize => PLAYERHALFSIZE;
@@ -139,12 +139,10 @@ public class PlayerController
         floorHeight = curFloor.GetFloorHeight();
     }
 
-    public void SetCurObstacle(BaseObstacle _obstacle)
+    public void SetCurObstacle(List<BaseObstacle> _obstacles)
     {
-        curObstacle = _obstacle;
-        obsWidth = curObstacle.GetWidth();
-        obsHeight = curObstacle.GetHeight();
-
+        curObstacles = _obstacles;
+        
     }
 
     private void CheckGroundAABB()
@@ -170,25 +168,40 @@ public class PlayerController
         {
             isGrounded = false;
         }
+
     }
 
     private void CheckObstacleAABB()
     {
-        if(curObstacle == null || !curObstacle.GetActive)
+        if(curObstacles == null)
         {
             return;
         }
 
-        Vector2 playerPos = playerTM.position;
-        Vector2 obsPos = curObstacle.GetTransform.position;
+        int count = curObstacles.Count;
 
-        if (obsPos.x - obsWidth * 0.5 < playerPos.x + PLAYERHALFSIZE &&
-            obsPos.x + obsWidth * 0.5f > playerPos.x - PLAYERHALFSIZE &&
-            obsPos.y - obsHeight * 0.5f < playerPos.y + PLAYERHALFSIZE  &&
-            obsPos.y + obsHeight * 0.5f >= playerPos.y - PLAYERHALFSIZE)
+        BaseObstacle obstacle;
+
+        for(int i = 0; i < count; i++)
         {
-            Debug.Log("장애물 충돌!!");
+            obstacle = curObstacles[i];
+
+            obsWidth = obstacle.GetWidth();
+            obsHeight = obstacle.GetHeight();
+
+            Vector2 playerPos = playerTM.position;
+            Vector2 obsPos = obstacle.GetTransform.position;
+
+            if (obsPos.x - obsWidth * 0.5 < playerPos.x + PLAYERHALFSIZE &&
+                obsPos.x + obsWidth * 0.5f > playerPos.x - PLAYERHALFSIZE &&
+                obsPos.y - obsHeight * 0.5f < playerPos.y + PLAYERHALFSIZE &&
+                obsPos.y + obsHeight * 0.5f >= playerPos.y - PLAYERHALFSIZE)
+            {
+                Debug.Log("장애물 충돌!!");
+            }
         }
+
+        
     }
 
     public Vector2 GetPlayerPos()

@@ -6,7 +6,8 @@ public enum EObstacleType
 {
     FIXED = 0,
     JUMP = 1,
-    FLY = 2
+    FLY = 2,
+    END = 3
 }
 
 public class BaseObstacle
@@ -49,11 +50,9 @@ public class BaseObstacle
         return boundsY;
     }
 
-    public void SetSprite(Sprite _sprite)
+    public virtual void SetSprite(Sprite _sprite)
     {
         obstacleSprite.sprite = _sprite;
-        boundsX = obstacleSprite.bounds.size.x;
-        boundsY = obstacleSprite.bounds.size.y;
     }
 
     public virtual void Action() { }

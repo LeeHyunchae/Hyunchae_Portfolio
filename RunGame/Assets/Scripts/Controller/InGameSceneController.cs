@@ -9,8 +9,8 @@ public class InGameSceneController : MonoBehaviour
     private PlayerController playerCtrl;
     private FloorController floorCtrl;
     private ObstacleController obstacleCtrl;
-    private int curSpeed = 3;
-    private float flyObstacleInterval = 30f;
+    private int curGameSpeed = 3;
+    private float flyObstacleInterval = 3f;
     private Camera mainCam;
 
     private void Awake()
@@ -20,7 +20,6 @@ public class InGameSceneController : MonoBehaviour
         InitPlayerCtrl();
         InitObstacleCtrl();
         InitFloorCtrl();
-        SetFirstObstacle();
     }
 
     private void InitPlayerCtrl()
@@ -42,7 +41,7 @@ public class InGameSceneController : MonoBehaviour
     private void InitObstacleCtrl()
     {
         obstacleCtrl = new ObstacleController();
-        obstacleCtrl.OnChangeCurLandObstacle = ChangeCurObstacle;
+        obstacleCtrl.OnChangeCurObstacles = ChangeCurObstacle;
         obstacleCtrl.SetScreenLeft(mainCam.ScreenToWorldPoint(new Vector3(0, 0, 0)).x);
         obstacleCtrl.SetFlyObstacleInterval(flyObstacleInterval);
         obstacleCtrl.Init();
@@ -59,13 +58,24 @@ public class InGameSceneController : MonoBehaviour
         {
             UpSpeedRate();
         }
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            DownSpeedRate();
+        }
     }
 
     private void UpSpeedRate()
     {
-        curSpeed++;
-        floorCtrl.SetSpeedRate(curSpeed);
-        obstacleCtrl.SetSpeedRate(curSpeed);
+        curGameSpeed++;
+        floorCtrl.SetSpeedRate(curGameSpeed);
+        obstacleCtrl.SetSpeedRate(curGameSpeed);
+    }
+
+    private void DownSpeedRate()
+    {
+        curGameSpeed--;
+        floorCtrl.SetSpeedRate(curGameSpeed);
+        obstacleCtrl.SetSpeedRate(curGameSpeed);
     }
 
     private void ChangeCurFloor(Floor _curFloor)
@@ -73,14 +83,9 @@ public class InGameSceneController : MonoBehaviour
         playerCtrl.SetCurFloor(_curFloor);
     }
 
-    private void ChangeCurObstacle(BaseObstacle _obstacle)
+    private void ChangeCurObstacle(List<BaseObstacle> _obstacles)
     {
-        playerCtrl.SetCurObstacle(_obstacle);
-    }
-
-    private void SetFirstObstacle()
-    {
-        //obstacleCtrl.InitFirstObstacle(floorCtrl.GetAllfFloor());
+        playerCtrl.SetCurObstacle(_obstacles);
     }
 
     private void OnRepositionFloor(Floor _floor)

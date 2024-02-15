@@ -146,7 +146,7 @@ public class FloorController
             }
             else
             {
-                floors[floorIdx].SetMiddleSize(Random.Range(1, 10));
+                floors[floorIdx].SetMiddleSize(Random.Range(1, 15));
 
                 RepositionFloor(floorIdx);
 

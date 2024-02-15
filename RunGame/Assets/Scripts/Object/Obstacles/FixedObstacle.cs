@@ -10,8 +10,16 @@ public class FixedObstacle : BaseObstacle
         base.Init(_obstacleObj);
         obstacleType = EObstacleType.FIXED;
     }
+
+    public override void SetSprite(Sprite _sprite)
+    {
+        base.SetSprite(_sprite);
+        boundsX = obstacleSprite.bounds.size.x;
+        boundsY = obstacleSprite.bounds.size.y;
+    }
+
     public override void Action()
     {
-        throw new System.NotImplementedException();
+        return;
     }
 }
