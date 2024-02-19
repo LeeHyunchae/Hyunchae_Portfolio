@@ -180,7 +180,7 @@ public class FloorController
 
     private bool CheckOutsideFloor(int _idx)
     {
-        return floors[_idx].GetTransform.position.x + floors[_idx].GetFloorWidth() * 0.5f <= screenLeft;
+        return floors[_idx].GetTransform.position.x + floors[_idx].GetFloorWidth() <= screenLeft;
     }
 
     public Floor GetFrontFloor()

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3897748275087516564}
   - component: {fileID: 4752824252997291160}
   m_Layer: 0
-  m_Name: BronzeCoin
+  m_Name: Coin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

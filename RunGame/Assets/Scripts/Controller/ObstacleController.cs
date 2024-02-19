@@ -21,7 +21,6 @@ public class ObstacleController
     private const int FIXED_OBSTACLE_START_NUM = OBSTACLE_CAPACITY * (int)EObstacleType.FIXED;
     private const int JUMP_OBSTACLE_START_NUM = OBSTACLE_CAPACITY * (int)EObstacleType.JUMP;
     private const int FLY_OBSTACLE_START_NUM = OBSTACLE_CAPACITY * (int)EObstacleType.FLY;
-    private const int OBSTACLECOUNT = OBSTACLE_CAPACITY * (int) EObstacleType.END;
 
     private const int ONE_OBSTACLE_SIZE = 4;
     private const int TWO_OBSTACLE_SIZE = 8;
@@ -98,7 +97,7 @@ public class ObstacleController
 
         obstacleParent.transform.position = Vector2.zero;
 
-        obstacles = new BaseObstacle[OBSTACLECOUNT];
+        obstacles = new BaseObstacle[OBSTACLE_CAPACITY * (int)EObstacleType.END];
         frontObstacles = new List<BaseObstacle>();
         rePosObstacleList = new List<BaseObstacle>();
 
@@ -294,6 +293,9 @@ public class ObstacleController
             {
                 obstacle = obstacles[prevFixedObstacleIdx];
                 prevFixedObstacleIdx = (prevFixedObstacleIdx + 1) % OBSTACLE_CAPACITY + FIXED_OBSTACLE_START_NUM;
+
+                obstacle.SetSprite(sprites[Random.Range(0, SPRITECOUNT)]);
+
             }
             else
             {
@@ -303,17 +305,16 @@ public class ObstacleController
 
             Vector2 obstaclePos = floor.GetTransform.position;
 
-            obstacle.SetSprite(sprites[Random.Range(0, SPRITECOUNT)]);
-
             int rndMinX = (int)(-(size * 0.5f) + obstacle.GetWidth() * 0.5f + FLOOR_WIDTH_CORRECTION);
             int rndMaxX = (int)(size * 0.5f - obstacle.GetWidth() * 0.5f + FLOOR_WIDTH_CORRECTION);
 
             int posX = (int)(obstaclePos.x + Random.Range(rndMinX,rndMaxX));
             float posY = floor.GetTransform.position.y + (floor.GetFloorHeight() * 0.5f) + (obstacle.GetHeight() * 0.5f);
+
             obstaclePos.x = posX;
             obstaclePos.y = posY;
             
-            obstacle.GetTransform.SetParent(_rePosFloor.GetTransform);
+            obstacle.GetTransform.SetParent(floor.GetTransform);
             obstacle.GetTransform.position = obstaclePos;
 
             obstacle.SetFloorPosition(obstaclePos);
@@ -327,8 +328,6 @@ public class ObstacleController
 
         if(frontObstacles.Count == 0 && rePosObstacleList.Count > 0)
         {
-            Debug.Log("첫번째 장애물 등록");
-
             frontObstacles.Add(rePosObstacleList[0]);
             OnChangeCurObstacles.Invoke(frontObstacles);
         }
@@ -360,11 +359,8 @@ public class ObstacleController
 
         if (frontObstacles.Count == 1)
         {
-            Debug.Log("첫번째 공중 장애ㅁ");
-
             frontFlyObstacleIdx = FLY_OBSTACLE_START_NUM;
            
-
             frontObstacles.Add(obstacle);
             OnChangeCurObstacles.Invoke(frontObstacles);
         }
