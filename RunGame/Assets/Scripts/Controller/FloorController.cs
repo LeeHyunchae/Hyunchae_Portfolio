@@ -17,6 +17,7 @@ public class FloorController
 {
     private const int INITSPEED = 3;
     private const int MININTERVAL = 3;
+    private const int MAXINTERVAL = 8;
     private const string FLOORPATH = "Prefabs/Floor";
     private const int FLOORCOUNT = 10;
     private const int FIRSTFLOORSIZE = 20;
@@ -117,14 +118,18 @@ public class FloorController
 
     private void RepositionFloor(int _index)
     {
-        floors[_index].SetMiddleSize(Random.Range(1, 10));
+        floors[_index].SetMiddleSize(Random.Range(1, 15));
 
         Vector2 floorPos = floors[_index].GetTransform.position;
 
-        floorPos.x = floors[lastFloorIdx].GetTransform.position.x + floors[lastFloorIdx].GetFloorWidth() * 0.5f + MININTERVAL + floors[_index].GetFloorWidth() * 0.5f;
+        int randomDistance = Random.Range(MININTERVAL, MAXINTERVAL);
+
+        floorPos.x = floors[lastFloorIdx].GetTransform.position.x + floors[lastFloorIdx].GetFloorWidth() * 0.5f + randomDistance + floors[_index].GetFloorWidth() * 0.5f;
         floorPos.y = Random.Range(-4, 4);
 
         floors[_index].GetTransform.position = floorPos;
+
+        floors[_index].SetPrevFloorDistance(randomDistance);
 
         lastFloorIdx = _index;
 
@@ -146,10 +151,7 @@ public class FloorController
             }
             else
             {
-                floors[floorIdx].SetMiddleSize(Random.Range(1, 15));
-
                 RepositionFloor(floorIdx);
-
             }
         }
     }

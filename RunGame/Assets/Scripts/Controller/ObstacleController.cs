@@ -17,14 +17,12 @@ public class ObstacleController
     private const string JUMP_OBSTACLE_PATH = "Prefabs/Enemy_BigDino";
     private const string FLY_OBSTACLE_PATH = "Prefabs/Obstacle_Arrow";
 
-    private const int OBSTACLE_CAPACITY = 10;
+    private const int OBSTACLE_CAPACITY = 30;
     private const int FIXED_OBSTACLE_START_NUM = OBSTACLE_CAPACITY * (int)EObstacleType.FIXED;
     private const int JUMP_OBSTACLE_START_NUM = OBSTACLE_CAPACITY * (int)EObstacleType.JUMP;
     private const int FLY_OBSTACLE_START_NUM = OBSTACLE_CAPACITY * (int)EObstacleType.FLY;
 
-    private const int ONE_OBSTACLE_SIZE = 4;
-    private const int TWO_OBSTACLE_SIZE = 8;
-    private const int THREE_OBSTACLE_SIZE = 12;
+    private const int MIN_FLOOR_SIZE = 4;
 
     private const int SPRITECOUNT = 4;
     private const int FLOOR_WIDTH_CORRECTION = 1;
@@ -192,7 +190,7 @@ public class ObstacleController
 
     private void CheckObstaclePos()
     {
-        if (CheckFrontObstacle(curActivateFloorObstacles.Peek()))
+        if (curActivateFloorObstacles.Count > 0 && CheckFrontObstacle(curActivateFloorObstacles.Peek()))
         {
             curActivateFloorObstacles.Dequeue();
 
@@ -265,25 +263,84 @@ public class ObstacleController
     {
         rePosObstacleList.Clear();
 
-        Floor floor = _rePosFloor;
+        if(floorReposX == 0)
+        {
+            floorReposX = _rePosFloor.GetTransform.position.x;
+        }
+
+        if(_rePosFloor.GetFloorMiddleSize() > MIN_FLOOR_SIZE)
+        {
+            bool isRandomPos = Random.value > 0.5f;
+
+            if (isRandomPos)
+            {
+                SetPosRandomPatternObstacle(_rePosFloor);
+                //SetPosStrightPatternFloorObstacle(_rePosFloor);
+            }
+            else
+            {
+                SetPosStrightPatternFloorObstacle(_rePosFloor);
+            }
+
+            if (frontObstacles.Count == 0 && rePosObstacleList.Count > 0)
+            {
+                frontObstacles.Add(rePosObstacleList[0]);
+                OnChangeCurObstacles.Invoke(frontObstacles);
+            }
+        }
+
+        return rePosObstacleList;
+    }
+
+    public void RepositionFlyObstacle()
+    {
+        if(floorReposX == 0)
+        {
+            return;
+        }
+
+        bool isOneObstacle = Random.value > 0.5f;
+
+        if(isOneObstacle)
+        {
+            SetPosOneFlyObstacle();
+        }
+        else
+        {
+            SetPosStrightPatternFlyObstacle();
+        }
+
+        if (frontObstacles.Count == 1)
+        {
+            frontFlyObstacleIdx = FLY_OBSTACLE_START_NUM;
+           
+            frontObstacles.Add(obstacles[frontFlyObstacleIdx]);
+            OnChangeCurObstacles.Invoke(frontObstacles);
+        }
+    }
+
+    public void SetPlayerHalfSize(float _halfSize)
+    {
+        playerHalfSize = _halfSize;
+    }
+
+    public void SetFlyObstacleInterval(float _intervalTime)
+    {
+        flyObstacleInterval = _intervalTime;
+    }
+
+    #region Patterns
+    private void SetPosRandomPatternObstacle(Floor _floor)
+    {
+        Floor floor = _floor;
 
         int size = floor.GetFloorMiddleSize();
 
-        if(floorReposX == 0)
-        {
-            floorReposX = floor.GetTransform.position.x;
-        }
+        int obstacleCount = size / MIN_FLOOR_SIZE;
 
-        //if(size >= THREE_OBSTACLE_SIZE)
-        //{
+        int floorDivideSize = size / obstacleCount;
 
-        //}
-        //else if(size >= TWO_OBSTACLE_SIZE)
-        //{
-
-        //}
-        //else
-        if(size >= ONE_OBSTACLE_SIZE)
+        for (int i = 0; i < obstacleCount; i++)
         {
             bool isFixedObstacle = (Random.value > 0.5f);
 
@@ -305,15 +362,12 @@ public class ObstacleController
 
             Vector2 obstaclePos = floor.GetTransform.position;
 
-            int rndMinX = (int)(-(size * 0.5f) + obstacle.GetWidth() * 0.5f + FLOOR_WIDTH_CORRECTION);
-            int rndMaxX = (int)(size * 0.5f - obstacle.GetWidth() * 0.5f + FLOOR_WIDTH_CORRECTION);
-
-            int posX = (int)(obstaclePos.x + Random.Range(rndMinX,rndMaxX));
+            float posX = (int)(obstaclePos.x - size * 0.5f + Random.Range(i * floorDivideSize + FLOOR_WIDTH_CORRECTION + obstacle.GetWidth() * 0.5f, i * floorDivideSize + floorDivideSize - obstacle.GetWidth() * 0.5f));
             float posY = floor.GetTransform.position.y + (floor.GetFloorHeight() * 0.5f) + (obstacle.GetHeight() * 0.5f);
 
             obstaclePos.x = posX;
             obstaclePos.y = posY;
-            
+
             obstacle.GetTransform.SetParent(floor.GetTransform);
             obstacle.GetTransform.position = obstaclePos;
 
@@ -326,22 +380,65 @@ public class ObstacleController
             curActivateFloorObstacles.Enqueue(obstacle);
         }
 
-        if(frontObstacles.Count == 0 && rePosObstacleList.Count > 0)
-        {
-            frontObstacles.Add(rePosObstacleList[0]);
-            OnChangeCurObstacles.Invoke(frontObstacles);
-        }
-
-        return rePosObstacleList;
     }
 
-    public void RepositionFlyObstacle()
+    private void SetPosStrightPatternFloorObstacle(Floor _floor)
     {
-        if(floorReposX == 0)
-        {
-            return;
-        }
+        Floor floor = _floor;
 
+        int size = floor.GetFloorMiddleSize();
+
+        int obstacleCount = size / MIN_FLOOR_SIZE;
+
+        Vector2 obstaclePos = floor.GetTransform.position;
+
+        float startPosX = obstaclePos.x - size * 0.5f + Random.Range(FLOOR_WIDTH_CORRECTION, size - obstacleCount - FLOOR_WIDTH_CORRECTION);
+
+        for (int i = 0; i < obstacleCount; i++)
+        {
+            bool isFixedObstacle = (Random.value > 0.5f);
+
+            BaseObstacle obstacle;
+
+            if (isFixedObstacle)
+            {
+                obstacle = obstacles[prevFixedObstacleIdx];
+                prevFixedObstacleIdx = (prevFixedObstacleIdx + 1) % OBSTACLE_CAPACITY + FIXED_OBSTACLE_START_NUM;
+
+                obstacle.SetSprite(sprites[Random.Range(0, SPRITECOUNT)]);
+
+            }
+            else
+            {
+                obstacle = obstacles[prevJumpObstacleIdx];
+                prevJumpObstacleIdx = (prevJumpObstacleIdx + 1) % OBSTACLE_CAPACITY + JUMP_OBSTACLE_START_NUM;
+            }
+
+            startPosX += obstacle.GetWidth() * 0.5f;
+
+            float posY = floor.GetTransform.position.y + (floor.GetFloorHeight() * 0.5f) + (obstacle.GetHeight() * 0.5f);
+
+            obstaclePos.x = startPosX;
+            obstaclePos.y = posY;
+
+            obstacle.GetTransform.SetParent(floor.GetTransform);
+            obstacle.GetTransform.position = obstaclePos;
+
+            startPosX += obstacle.GetWidth() * 0.5f;
+
+            obstacle.SetFloorPosition(obstaclePos);
+
+            obstacle.SetActive(true);
+
+            rePosObstacleList.Add(obstacle);
+
+            curActivateFloorObstacles.Enqueue(obstacle);
+
+        }
+    }
+
+    private void SetPosOneFlyObstacle()
+    {
         BaseObstacle obstacle = obstacles[prevFlyObstacleIdx];
 
         Vector2 obstaclePos = Vector2.zero;
@@ -357,22 +454,31 @@ public class ObstacleController
 
         prevFlyObstacleIdx = (prevFlyObstacleIdx + 1) % OBSTACLE_CAPACITY + FLY_OBSTACLE_START_NUM;
 
-        if (frontObstacles.Count == 1)
+    }
+
+    private void SetPosStrightPatternFlyObstacle()
+    {
+        int obstacleCount = Random.Range(2, 5);
+        int startPosY = Random.Range(-3, 7);
+
+        for (int i = 0; i<obstacleCount; i++)
         {
-            frontFlyObstacleIdx = FLY_OBSTACLE_START_NUM;
-           
-            frontObstacles.Add(obstacle);
-            OnChangeCurObstacles.Invoke(frontObstacles);
+            BaseObstacle obstacle = obstacles[prevFlyObstacleIdx];
+
+            Vector2 obstaclePos = Vector2.zero;
+
+            obstaclePos.x = floorReposX;
+            obstaclePos.y = startPosY - i * obstacle.GetHeight();
+
+            obstacle.GetTransform.position = obstaclePos;
+
+            obstacle.SetFloorPosition(obstaclePos);
+
+            obstacle.SetActive(true);
+
+            prevFlyObstacleIdx = (prevFlyObstacleIdx + 1) % OBSTACLE_CAPACITY + FLY_OBSTACLE_START_NUM;
         }
-    }
 
-    public void SetPlayerHalfSize(float _halfSize)
-    {
-        playerHalfSize = _halfSize;
     }
-
-    public void SetFlyObstacleInterval(float _intervalTime)
-    {
-        flyObstacleInterval = _intervalTime;
-    }
+    #endregion
 }

@@ -7,13 +7,15 @@ public class Floor
     private const int LEFT = 0;
     private const int MIDDLE = 1;
     private const int RIGHT = 2;
-    private const float FLOOR_HALF_SIZE = 0.5f;
 
     private SpriteRenderer[] floors = new SpriteRenderer[3];
     private Transform _transform;
 
     public Transform GetTransform => _transform;
-    
+    private int prevFloorDistance = 0;
+
+    public int PrevFloorDistance => prevFloorDistance;
+
     public void Init(GameObject _floorObj)
     {
         floors = _floorObj.GetComponentsInChildren<SpriteRenderer>();
@@ -27,6 +29,11 @@ public class Floor
 
         floors[LEFT].transform.localPosition = new Vector2(-_middleSize * 0.5f - 0.5f, 0);
         floors[RIGHT].transform.localPosition = new Vector2(_middleSize * 0.5f + 0.5f, 0);
+    }
+
+    public void SetPrevFloorDistance(int _distance)
+    {
+        prevFloorDistance = _distance;
     }
 
     public int GetFloorWidth()

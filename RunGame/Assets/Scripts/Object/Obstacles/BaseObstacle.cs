@@ -15,7 +15,7 @@ public class BaseObstacle
     protected SpriteRenderer obstacleSprite = new SpriteRenderer();
     protected Transform _transform;
     protected EObstacleType obstacleType;
-    protected float obstacleSpeedRate = 0;
+    protected float obstacleSpeedRate = 8;
 
     public Transform GetTransform => _transform;
     public bool GetActive => obstacleSprite.enabled;
@@ -23,7 +23,6 @@ public class BaseObstacle
     public float GetSpeedRate => obstacleSpeedRate;
 
     public void SetActive(bool _active) => obstacleSprite.enabled = _active;
-    public void SetSpeed(int _speed) => obstacleSpeedRate = _speed;
 
     protected float boundsX;
     protected float boundsY;
@@ -40,12 +39,14 @@ public class BaseObstacle
         boundsY = obstacleSprite.bounds.size.y;
     }
 
-    public float GetWidth()
+    public virtual void SetSpeed(int _speed){}
+
+    public virtual float GetWidth()
     {
         return boundsX;
     }
 
-    public float GetHeight()
+    public virtual float GetHeight()
     {
         return boundsY;
     }

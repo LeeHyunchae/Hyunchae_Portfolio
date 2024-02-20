@@ -21,7 +21,7 @@ public class Coin
 
     public Transform GetTransform => _transform;
     public bool GetActive => sprite.enabled;
-    public ECoinType GetObstacleType => coinType;
+    public ECoinType GetCoinType => coinType;
 
     public void SetActive(bool _active) => sprite.enabled = _active;
 

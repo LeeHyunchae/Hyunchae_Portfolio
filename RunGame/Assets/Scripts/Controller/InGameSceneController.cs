@@ -10,7 +10,7 @@ public class InGameSceneController : MonoBehaviour
     private FloorController floorCtrl;
     private ObstacleController obstacleCtrl;
     private CoinController coinCtrl;
-    private int curGameSpeed = 3;
+    private int curGameSpeed = 5;
     private float flyObstacleInterval = 3f;
     private Camera mainCam;
 
@@ -22,6 +22,8 @@ public class InGameSceneController : MonoBehaviour
         InitObstacleCtrl();
         InitCoinCtrl();
         InitFloorCtrl();
+
+        SetSpeedRate();
     }
 
     private void InitPlayerCtrl()
@@ -68,24 +70,18 @@ public class InGameSceneController : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.RightArrow))
         {
-            UpSpeedRate();
+            curGameSpeed++;
+            SetSpeedRate();
         }
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            DownSpeedRate();
+            curGameSpeed--;
+            SetSpeedRate();
         }
     }
 
-    private void UpSpeedRate()
+    private void SetSpeedRate()
     {
-        curGameSpeed++;
-        floorCtrl.SetSpeedRate(curGameSpeed);
-        obstacleCtrl.SetSpeedRate(curGameSpeed);
-    }
-
-    private void DownSpeedRate()
-    {
-        curGameSpeed--;
         floorCtrl.SetSpeedRate(curGameSpeed);
         obstacleCtrl.SetSpeedRate(curGameSpeed);
     }
@@ -102,13 +98,13 @@ public class InGameSceneController : MonoBehaviour
 
     private void ChangeCurCoins(List<Coin> _coins)
     {
-
+        playerCtrl.SetCurCoin(_coins);
     }
 
     private void OnRepositionFloor(Floor _floor)
     {
         List<BaseObstacle> obstacles = obstacleCtrl.OnRepositionFloor(_floor);
-        coinCtrl.OnRepositionFloor(_floor);
+        coinCtrl.OnRepositionFloor(_floor,obstacles);
     }
 
 }

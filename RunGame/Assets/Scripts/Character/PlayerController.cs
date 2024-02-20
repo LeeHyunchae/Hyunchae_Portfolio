@@ -36,6 +36,7 @@ public class PlayerController
     private Transform playerTM;
     private Floor curFloor;
     private List<BaseObstacle> curObstacles;
+    private List<Coin> curCoins;
     private Vector2 playerPos;
 
     public float GetPlayerHalfSize => PLAYERHALFSIZE;
@@ -67,7 +68,7 @@ public class PlayerController
 
         CheckGroundAABB();
         CheckObstacleAABB();
-
+        CheckCoinAABB();
 
         if (isGrounded && state != PlayerState.WALK)
         {
@@ -145,6 +146,11 @@ public class PlayerController
         
     }
 
+    public void SetCurCoin(List<Coin> _coins)
+    {
+        curCoins = _coins;
+    }
+
     private void CheckGroundAABB()
     {
         if(shortJumpPower > 0 || curFloor == null)
@@ -202,6 +208,40 @@ public class PlayerController
         }
 
         
+    }
+
+    private void CheckCoinAABB()
+    {
+        if (curCoins == null)
+        {
+            return;
+        }
+
+        int count = curCoins.Count;
+
+        Coin coin;
+
+        for (int i = 0; i < count; i++)
+        {
+            coin = curCoins[i];
+
+            obsWidth = coin.GetWidth();
+            obsHeight = coin.GetHeight();
+
+            Vector2 playerPos = playerTM.position;
+            Vector2 obsPos = coin.GetTransform.position;
+
+            if (obsPos.x - obsWidth * 0.5 < playerPos.x + PLAYERHALFSIZE &&
+                obsPos.x + obsWidth * 0.5f > playerPos.x - PLAYERHALFSIZE &&
+                obsPos.y - obsHeight * 0.5f < playerPos.y + PLAYERHALFSIZE &&
+                obsPos.y + obsHeight * 0.5f >= playerPos.y - PLAYERHALFSIZE)
+            {
+                Debug.Log("동전 충돌!!");
+                coin.SetActive(false);
+            }
+        }
+
+
     }
 
     public Vector2 GetPlayerPos()
