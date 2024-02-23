@@ -170,9 +170,13 @@ public class ObstacleController
     public void Update()
     {
         CheckObstaclePos();
-        OnActionObstacle();
 
         CheckFlyObstacleInterval();
+    }
+
+    public void FixedUpdate()
+    {
+        OnActionObstacle();
     }
 
     private void OnActionObstacle()
@@ -275,11 +279,11 @@ public class ObstacleController
             if (isRandomPos)
             {
                 SetPosRandomPatternObstacle(_rePosFloor);
-                //SetPosStrightPatternFloorObstacle(_rePosFloor);
             }
             else
             {
-                SetPosStrightPatternFloorObstacle(_rePosFloor);
+                //SetPosStrightPatternFloorObstacle(_rePosFloor);
+                SetPosRandomPatternObstacle(_rePosFloor);
             }
 
             if (frontObstacles.Count == 0 && rePosObstacleList.Count > 0)
@@ -362,14 +366,18 @@ public class ObstacleController
 
             Vector2 obstaclePos = floor.GetTransform.position;
 
-            float posX = (int)(obstaclePos.x - size * 0.5f + Random.Range(i * floorDivideSize + FLOOR_WIDTH_CORRECTION + obstacle.GetWidth() * 0.5f, i * floorDivideSize + floorDivideSize - obstacle.GetWidth() * 0.5f));
-            float posY = floor.GetTransform.position.y + (floor.GetFloorHeight() * 0.5f) + (obstacle.GetHeight() * 0.5f);
+            int halfSize = size / 2;
+            float minX = i * floorDivideSize + obstacle.GetWidth() * 0.5f - halfSize;
+            float maxX = i * floorDivideSize + obstacle.GetWidth() * 0.5f + floorDivideSize - FLOOR_WIDTH_CORRECTION - halfSize;
+            int posX = (int)(Random.Range(minX,maxX));
+            //float posX = (int)(obstaclePos.x - size * 0.5f + Random.Range(i * floorDivideSize + FLOOR_WIDTH_CORRECTION + obstacle.GetWidth() * 0.5f, i * floorDivideSize + floorDivideSize - obstacle.GetWidth() * 0.5f));
+            float posY = (floor.GetFloorHeight() * 0.5f) + (obstacle.GetHeight() * 0.5f);
 
             obstaclePos.x = posX;
             obstaclePos.y = posY;
 
             obstacle.GetTransform.SetParent(floor.GetTransform);
-            obstacle.GetTransform.position = obstaclePos;
+            obstacle.GetTransform.localPosition = obstaclePos;
 
             obstacle.SetFloorPosition(obstaclePos);
 

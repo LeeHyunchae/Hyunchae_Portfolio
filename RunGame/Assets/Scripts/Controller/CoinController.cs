@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 public class CoinController
 {
     private const string COIN_PATH = "Prefabs/Coin";
-    private const int MIN_INTERVAL = 1;
+    private const float MIN_INTERVAL = 0.6f;
 
     private const int COIN_CAPACITY = 200;
 
@@ -139,11 +139,11 @@ public class CoinController
 
         if(_obstacles.Count == 0)
         {
-            SetStrightRandomCoinPattern(_rePosFloor);
+            SetPosStrightRandomCoinPattern(_rePosFloor);
         }
         else
         {
-            SetSemiCirclePattern(_rePosFloor, _obstacles);
+            SetPosObstaclePattern(_rePosFloor, _obstacles);
         }
 
     }
@@ -153,7 +153,7 @@ public class CoinController
         playerHalfSize = _halfSize;
     }
 
-    private void SetStrightRandomCoinPattern(Floor _floor)
+    private void SetPosStrightRandomCoinPattern(Floor _floor)
     {
         Floor floor = _floor;
 
@@ -161,7 +161,7 @@ public class CoinController
 
         int coinGrade = Random.Range(0, (int)ECoinType.END);
 
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i <= size; i++)
         {
             Coin coin;
 
@@ -172,11 +172,17 @@ public class CoinController
 
             Vector2 coinPos = floor.GetTransform.position;
 
-            coinPos.x = floor.GetTransform.position.x + -(size * 0.5f) + coin.GetWidth() * 0.5f + i;
-            coinPos.y = floor.GetTransform.position.y + (floor.GetFloorHeight() * 0.5f) + (coin.GetHeight() * 0.5f);
+            float result = -(size * 0.5f) + i;
+            coinPos.x = (result < 0) ? (int)(result) : (int)(result + 0.5f);
+
+            if(size % 2 != 0)
+            {
+                coinPos.x -= 0.5f;
+            }
+            coinPos.y = (floor.GetFloorHeight() * 0.5f) + (coin.GetHeight() * 0.5f);
 
             coin.GetTransform.SetParent(floor.GetTransform);
-            coin.GetTransform.position = coinPos;
+            coin.GetTransform.localPosition = coinPos;
 
             coin.SetFloorPosition(coinPos);
 
@@ -187,7 +193,7 @@ public class CoinController
 
     }
 
-    private void SetSemiCirclePattern(Floor _floor, List<BaseObstacle> _obstacles)
+    private void SetPosObstaclePattern(Floor _floor, List<BaseObstacle> _obstacles)
     {
         Floor floor = _floor;
 
@@ -199,11 +205,9 @@ public class CoinController
 
         int obstaclesCount = _obstacles.Count -1;
 
-        float distance = 0;
-
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i <= size; i++)
         {
-            Vector2 obstaclePos = _obstacles[obstacleIdx].GetTransform.position;
+            Vector2 obstaclePos = _obstacles[obstacleIdx].GetTransform.localPosition;
             float obstacleHalfWidth = _obstacles[obstacleIdx].GetWidth() * 0.5f;
                 
             Coin coin;
@@ -215,26 +219,30 @@ public class CoinController
 
             Vector2 coinPos = floor.GetTransform.position;
 
-            coinPos.x = floor.GetTransform.position.x + -(size * 0.5f) + coin.GetWidth() * 0.5f + i;
+            float result = -(size * 0.5f) + i;
+            coinPos.x = (result < 0) ? (int)(result) : (int)(result + 0.5f);
 
-            if (coinPos.x > obstaclePos.x && obstacleIdx != obstaclesCount)
+            if (size % 2 != 0)
             {
-                obstacleIdx = (obstacleIdx + 1) % _obstacles.Count;
-                obstaclePos = _obstacles[obstacleIdx].GetTransform.position;
+                coinPos.x -= coin.GetWidth() * 0.5f;
             }
 
-            distance = Mathf.Abs(coinPos.x - obstaclePos.x);
+            coinPos.y = (floor.GetFloorHeight() * 0.5f) + (coin.GetHeight() * 0.5f);
 
-            coinPos.y = floor.GetTransform.position.y + (floor.GetFloorHeight() * 0.5f) + (coin.GetHeight() * 0.5f);
+            float distance = Mathf.Abs(coinPos.x - obstaclePos.x);
 
-            
             if (distance < MIN_INTERVAL + obstacleHalfWidth)
             {
                 coinPos.y += 2;
             }
+            
+            if(coinPos.x > obstaclePos.x && obstacleIdx != obstaclesCount)
+            {
+                obstacleIdx++;
+            }
 
             coin.GetTransform.SetParent(floor.GetTransform);
-            coin.GetTransform.position = coinPos;
+            coin.GetTransform.localPosition = coinPos;
 
             coin.SetFloorPosition(coinPos);
 
@@ -245,7 +253,7 @@ public class CoinController
 
     }
 
-    private void SetSquarePattern(Floor _floor)
+    private void SetPosSquarePattern(Floor _floor)
     {
         Floor floor = _floor;
 

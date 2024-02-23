@@ -14,17 +14,17 @@ public class PlayerController
 {
     private Animator anim;
     private const string PLAYERSTATE = "PlayerState";
-    private const float GRAVITY = 0.15f;
-    private const float LONGJUMPPOWER = 0.1f;
+    private const float GRAVITY = 0.35f;
+    private const float LONGJUMPPOWER = 0.125f;
     private const float PLAYERHALFSIZE = 0.5f;
     private const string PLAYERPATH = "Prefabs/Player";
     private const float PLAYER_HEIGHT_COLLECTION_VALUE = 0.1f;
-    private const float FLOOR_HEIGHT_COLLECTION_VALUE = 0.4f;
+    private const float FLOOR_HEIGHT_COLLECTION_VALUE = 0.2f;
 
     private bool isGrounded;
 
     private float shortJumpPower = 0;
-    private float shortJumpHeight = 0.1f;
+    private float shortJumpHeight = 0.225f;
     private float curLongJumpPower = 0;
     private float floorWidth = 0;
     private float floorHeight = 0;
@@ -57,9 +57,24 @@ public class PlayerController
 
     public void Update()
     {
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            Debug.Log("Up");
+            Jump();
+        }
+        else if (Input.GetKey(KeyCode.UpArrow) && shortJumpPower > 0)
+        {
+            LongJump();
+        }
+
+
+    }
+
+    public void FixedUpdate()
+    {
         if (!isGrounded)
         {
-            Jumping();
+            OnJumping();
         }
 
         playerPos.y += shortJumpPower + curLongJumpPower;
@@ -74,20 +89,9 @@ public class PlayerController
         {
             Land();
         }
-
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            Jump();
-        }
-        else if (Input.GetKey(KeyCode.UpArrow) && shortJumpPower > 0)
-        {
-            LongJump();
-        }
-
-
     }
 
-    private void Jumping()
+    private void OnJumping()
     {
         shortJumpPower -= GRAVITY * Time.deltaTime;
 
@@ -108,7 +112,11 @@ public class PlayerController
 
     private void LongJump()
     {
-        curLongJumpPower = Mathf.Lerp(curLongJumpPower, LONGJUMPPOWER, 0.01f);
+        if(state != PlayerState.JUMPDOWN)
+        {
+            curLongJumpPower = Mathf.Lerp(curLongJumpPower, LONGJUMPPOWER, 0.01f);
+        }
+
     }
 
     private void Land()
@@ -116,10 +124,12 @@ public class PlayerController
         shortJumpPower = 0;
         curLongJumpPower = 0;
 
-        Vector2 playerPos = playerTM.position;
-        playerPos.y = curFloor.GetTransform.position.y + curFloor.GetFloorHeight() * 0.5f + PLAYERHALFSIZE;
-        playerTM.position = playerPos;
         ChangeState(PlayerState.WALK);
+
+        playerPos = playerTM.position;
+        playerPos.y = (int)(curFloor.GetTransform.position.y + curFloor.GetFloorHeight() * 0.5f + PLAYERHALFSIZE);
+        Debug.Log((int)(curFloor.GetTransform.position.y + curFloor.GetFloorHeight() * 0.5f + PLAYERHALFSIZE));
+        playerTM.position = playerPos;
     }
 
     private void ChangeState(PlayerState _state)

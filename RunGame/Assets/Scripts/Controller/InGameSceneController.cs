@@ -61,6 +61,11 @@ public class InGameSceneController : MonoBehaviour
         coinCtrl.SetPlayerHalfSize(playerCtrl.GetPlayerHalfSize);
     }
 
+    private void FixedUpdate()
+    {
+        playerCtrl.FixedUpdate();
+        obstacleCtrl.FixedUpdate();
+    }
     private void Update()
     {
         playerCtrl.Update();

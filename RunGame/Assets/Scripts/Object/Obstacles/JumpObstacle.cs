@@ -50,10 +50,10 @@ public class JumpObstacle : BaseObstacle
             jumpTime = 0;
         }
 
-        if(_transform.position.y <= floorPosY && jumpPower < 0)
+        if(_transform.localPosition.y <= floorPosY && jumpPower < 0)
         {
             isJumping = false;
-            _transform.position = new Vector2(_transform.position.x, floorPosY);
+            _transform.localPosition = new Vector2(floorPosX, floorPosY);
         }    
 
     }
@@ -62,7 +62,7 @@ public class JumpObstacle : BaseObstacle
     {
         base.SetFloorPosition(_floorPos);
         jumpInterval = Random.Range(1, 5);
-        jumpHeight = Random.Range(0.075f, 0.125f);
+        jumpHeight = Random.Range(0.1f, 0.15f);
 
     }
 }
