@@ -12,9 +12,11 @@ public class Floor
     private Transform _transform;
 
     public Transform GetTransform => _transform;
-    private int prevFloorDistance = 0;
+    private Vector2 prevFloorPos;
+    private int prevFloorDistance;
 
-    public int PrevFloorDistance => prevFloorDistance;
+    public Vector2 GetPrevFloorPos => prevFloorPos;
+    public int GetPrevFloorDistance => prevFloorDistance;
 
     public void Init(GameObject _floorObj)
     {
@@ -31,8 +33,9 @@ public class Floor
         floors[RIGHT].transform.localPosition = new Vector2(_middleSize * 0.5f + 0.5f, 0);
     }
 
-    public void SetPrevFloorDistance(int _distance)
+    public void SetPrevFloorPos(Vector2 _prevFloorPos, int _distance)
     {
+        prevFloorPos = _prevFloorPos;
         prevFloorDistance = _distance;
     }
 

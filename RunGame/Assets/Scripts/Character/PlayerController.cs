@@ -14,7 +14,7 @@ public class PlayerController
 {
     private Animator anim;
     private const string PLAYERSTATE = "PlayerState";
-    private const float GRAVITY = 0.35f;
+    private const float GRAVITY = 0.45f;
     private const float LONGJUMPPOWER = 0.125f;
     private const float PLAYERHALFSIZE = 0.5f;
     private const string PLAYERPATH = "Prefabs/Player";
@@ -22,14 +22,15 @@ public class PlayerController
     private const float FLOOR_HEIGHT_COLLECTION_VALUE = 0.2f;
 
     private bool isGrounded;
+    private bool isDoubleJump;
 
     private float shortJumpPower = 0;
     private float shortJumpHeight = 0.225f;
     private float curLongJumpPower = 0;
     private float floorWidth = 0;
     private float floorHeight = 0;
-    private float obsWidth = 0;
-    private float obsHeight = 0;
+    private float coinWidth = 0;
+    private float coinHeight = 0;
 
     private PlayerState state;
 
@@ -59,7 +60,6 @@ public class PlayerController
     {
         if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            Debug.Log("Up");
             Jump();
         }
         else if (Input.GetKey(KeyCode.UpArrow) && shortJumpPower > 0)
@@ -107,6 +107,14 @@ public class PlayerController
         {
             shortJumpPower = shortJumpHeight;
             ChangeState(PlayerState.JUMPUP);
+            return;
+        }
+        else if(!isDoubleJump)
+        {
+            isDoubleJump = true;
+            shortJumpPower = shortJumpHeight;
+            Debug.Log("더블점프");
+            ChangeState(PlayerState.JUMPUP);
         }
     }
 
@@ -123,12 +131,12 @@ public class PlayerController
     {
         shortJumpPower = 0;
         curLongJumpPower = 0;
+        isDoubleJump = false;
 
         ChangeState(PlayerState.WALK);
 
         playerPos = playerTM.position;
         playerPos.y = (int)(curFloor.GetTransform.position.y + curFloor.GetFloorHeight() * 0.5f + PLAYERHALFSIZE);
-        Debug.Log((int)(curFloor.GetTransform.position.y + curFloor.GetFloorHeight() * 0.5f + PLAYERHALFSIZE));
         playerTM.position = playerPos;
     }
 
@@ -153,7 +161,6 @@ public class PlayerController
     public void SetCurObstacle(List<BaseObstacle> _obstacles)
     {
         curObstacles = _obstacles;
-        
     }
 
     public void SetCurCoin(List<Coin> _coins)
@@ -202,16 +209,16 @@ public class PlayerController
         {
             obstacle = curObstacles[i];
 
-            obsWidth = obstacle.GetWidth();
-            obsHeight = obstacle.GetHeight();
+            coinWidth = obstacle.GetWidth();
+            coinHeight = obstacle.GetHeight();
 
             Vector2 playerPos = playerTM.position;
-            Vector2 obsPos = obstacle.GetTransform.position;
+            Vector2 obstaclePos = obstacle.GetPosition();
 
-            if (obsPos.x - obsWidth * 0.5 < playerPos.x + PLAYERHALFSIZE &&
-                obsPos.x + obsWidth * 0.5f > playerPos.x - PLAYERHALFSIZE &&
-                obsPos.y - obsHeight * 0.5f < playerPos.y + PLAYERHALFSIZE &&
-                obsPos.y + obsHeight * 0.5f >= playerPos.y - PLAYERHALFSIZE)
+            if (obstaclePos.x - coinWidth * 0.5 < playerPos.x + PLAYERHALFSIZE &&
+                obstaclePos.x + coinWidth * 0.5f > playerPos.x - PLAYERHALFSIZE &&
+                obstaclePos.y - coinHeight * 0.5f < playerPos.y + PLAYERHALFSIZE &&
+                obstaclePos.y + coinHeight * 0.5f >= playerPos.y - PLAYERHALFSIZE)
             {
                 Debug.Log("장애물 충돌!!");
             }
@@ -235,16 +242,16 @@ public class PlayerController
         {
             coin = curCoins[i];
 
-            obsWidth = coin.GetWidth();
-            obsHeight = coin.GetHeight();
+            coinWidth = coin.GetWidth();
+            coinHeight = coin.GetHeight();
 
             Vector2 playerPos = playerTM.position;
-            Vector2 obsPos = coin.GetTransform.position;
+            Vector2 coinPos = coin.GetTransform.position;
 
-            if (obsPos.x - obsWidth * 0.5 < playerPos.x + PLAYERHALFSIZE &&
-                obsPos.x + obsWidth * 0.5f > playerPos.x - PLAYERHALFSIZE &&
-                obsPos.y - obsHeight * 0.5f < playerPos.y + PLAYERHALFSIZE &&
-                obsPos.y + obsHeight * 0.5f >= playerPos.y - PLAYERHALFSIZE)
+            if (coinPos.x - coinWidth * 0.3f < playerPos.x + PLAYERHALFSIZE &&
+                coinPos.x + coinWidth * 0.3f > playerPos.x - PLAYERHALFSIZE &&
+                coinPos.y - coinHeight * 0.3f < playerPos.y + PLAYERHALFSIZE &&
+                coinPos.y + coinHeight * 0.3f >= playerPos.y - PLAYERHALFSIZE)
             {
                 Debug.Log("동전 충돌!!");
                 coin.SetActive(false);
@@ -252,10 +259,5 @@ public class PlayerController
         }
 
 
-    }
-
-    public Vector2 GetPlayerPos()
-    {
-        return playerTM.position;
     }
 }

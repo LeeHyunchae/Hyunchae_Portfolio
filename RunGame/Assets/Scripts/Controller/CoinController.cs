@@ -1,20 +1,27 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
+
+public enum ECoinPosType
+{
+    FLOOR = 0,
+    PATTERN = 1
+}
 
 public class CoinController
 {
     private const string COIN_PATH = "Prefabs/Coin";
-    private const float MIN_INTERVAL = 0.6f;
+    private const float MIN_OBSTACLE_INTERVAL = 0.6f;
+    private const int MIN_FLOOR_INTERVAL = 4;
 
-    private const int COIN_CAPACITY = 200;
+    private const int COIN_CAPACITY = 400;
 
     private Coin[] coins;
 
     private float screenLeft;
-    private float floorReposX = 0;
 
     private float playerHalfSize = 0;
 
@@ -80,6 +87,19 @@ public class CoinController
     public void Update()
     {
         CheckCoinPos();
+
+        //첫번째 코인 확인
+        Debug.DrawLine(new Vector3(curActivateCoins.Peek().GetTransform.position.x - curActivateCoins.Peek().GetWidth() * 0.5f, curActivateCoins.Peek().GetTransform.position.y + curActivateCoins.Peek().GetHeight() * 0.5f,0),
+            new Vector3(curActivateCoins.Peek().GetTransform.position.x + curActivateCoins.Peek().GetWidth() * 0.5f, curActivateCoins.Peek().GetTransform.position.y + curActivateCoins.Peek().GetHeight() * 0.5f, 0),Color.red);
+
+        Debug.DrawLine(new Vector3(curActivateCoins.Peek().GetTransform.position.x - curActivateCoins.Peek().GetWidth() * 0.5f, curActivateCoins.Peek().GetTransform.position.y - curActivateCoins.Peek().GetHeight() * 0.5f, 0),
+            new Vector3(curActivateCoins.Peek().GetTransform.position.x + curActivateCoins.Peek().GetWidth() * 0.5f, curActivateCoins.Peek().GetTransform.position.y - curActivateCoins.Peek().GetHeight() * 0.5f, 0), Color.red);
+
+        Debug.DrawLine(new Vector3(curActivateCoins.Peek().GetTransform.position.x - curActivateCoins.Peek().GetWidth() * 0.5f, curActivateCoins.Peek().GetTransform.position.y - curActivateCoins.Peek().GetHeight() * 0.5f, 0),
+            new Vector3(curActivateCoins.Peek().GetTransform.position.x - curActivateCoins.Peek().GetWidth() * 0.5f, curActivateCoins.Peek().GetTransform.position.y + curActivateCoins.Peek().GetHeight() * 0.5f, 0), Color.red);
+
+        Debug.DrawLine(new Vector3(curActivateCoins.Peek().GetTransform.position.x + curActivateCoins.Peek().GetWidth() * 0.5f, curActivateCoins.Peek().GetTransform.position.y - curActivateCoins.Peek().GetHeight() * 0.5f, 0),
+            new Vector3(curActivateCoins.Peek().GetTransform.position.x + curActivateCoins.Peek().GetWidth() * 0.5f, curActivateCoins.Peek().GetTransform.position.y + curActivateCoins.Peek().GetHeight() * 0.5f, 0), Color.red);
     }
 
     private void CheckCoinPos()
@@ -90,7 +110,9 @@ public class CoinController
 
             if (OnChangeCurCoins != null)
             {
-                frontCoins[0] = curActivateCoins.Peek();
+                frontCoins = curActivateCoins.ToList();
+
+                //frontCoins[0] = curActivateCoins.Peek();
 
                 OnChangeCurCoins.Invoke(frontCoins);
             }
@@ -132,12 +154,19 @@ public class CoinController
             OnChangeCurCoins.Invoke(frontCoins);
         }
 
-        if (floorReposX == 0)
+        if (_rePosFloor.GetPrevFloorDistance > MIN_FLOOR_INTERVAL)
         {
-            floorReposX = _rePosFloor.GetTransform.position.x;
+            bool isSquarePattern = Random.value > 0.5f;
+
+            SetPosSquarePattern(_rePosFloor);
+
+            //if (isSquarePattern)
+            //{
+            //    SetPosSquarePattern(_rePosFloor);
+            //}
         }
 
-        if(_obstacles.Count == 0)
+        if (_obstacles.Count == 0)
         {
             SetPosStrightRandomCoinPattern(_rePosFloor);
         }
@@ -145,6 +174,7 @@ public class CoinController
         {
             SetPosObstaclePattern(_rePosFloor, _obstacles);
         }
+
 
     }
 
@@ -183,8 +213,6 @@ public class CoinController
 
             coin.GetTransform.SetParent(floor.GetTransform);
             coin.GetTransform.localPosition = coinPos;
-
-            coin.SetFloorPosition(coinPos);
 
             coin.SetActive(true);
 
@@ -231,7 +259,7 @@ public class CoinController
 
             float distance = Mathf.Abs(coinPos.x - obstaclePos.x);
 
-            if (distance < MIN_INTERVAL + obstacleHalfWidth)
+            if (distance < MIN_OBSTACLE_INTERVAL + obstacleHalfWidth)
             {
                 coinPos.y += 2;
             }
@@ -244,8 +272,6 @@ public class CoinController
             coin.GetTransform.SetParent(floor.GetTransform);
             coin.GetTransform.localPosition = coinPos;
 
-            coin.SetFloorPosition(coinPos);
-
             coin.SetActive(true);
 
             curActivateCoins.Enqueue(coin);
@@ -257,11 +283,18 @@ public class CoinController
     {
         Floor floor = _floor;
 
-        int size = floor.GetFloorWidth();
+        int squareSize = Random.Range(MIN_FLOOR_INTERVAL, _floor.GetPrevFloorDistance);
 
         int coinGrade = Random.Range(0, (int)ECoinType.END);
 
-        for (int i = 0; i < size; i++)
+        Vector2 coinPos = _floor.GetTransform.position;
+        Debug.Log(coins[0].GetWidth());
+        coinPos.x = coinPos.x - _floor.GetFloorWidth() * 0.5f - _floor.GetPrevFloorDistance * 0.5f - (squareSize * 0.5f);
+        coinPos.y = _floor.GetPrevFloorPos.y + squareSize + MIN_FLOOR_INTERVAL;
+
+        float startPosY = coinPos.y;
+
+        for (int i = 0; i < squareSize * squareSize; i++)
         {
             Coin coin;
 
@@ -270,15 +303,15 @@ public class CoinController
 
             coin.SetCoinGrade(coinGrade);
 
-            Vector2 coinPos = floor.GetTransform.position;
+            if (i % squareSize == 0)
+            {
+                coinPos.x += coin.GetWidth();
+            }
 
-            coinPos.x = floor.GetTransform.position.x + -(size * 0.5f) + coin.GetWidth() * 0.5f + i;
-            coinPos.y = floor.GetTransform.position.y + (floor.GetFloorHeight() * 0.5f) + (coin.GetHeight() * 0.5f);
+            coinPos.y = startPosY - (coin.GetHeight() * (i % squareSize));
 
             coin.GetTransform.SetParent(floor.GetTransform);
             coin.GetTransform.position = coinPos;
-
-            coin.SetFloorPosition(coinPos);
 
             coin.SetActive(true);
 

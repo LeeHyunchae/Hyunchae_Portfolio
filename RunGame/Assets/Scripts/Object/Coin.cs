@@ -28,9 +28,6 @@ public class Coin
     private float boundsX;
     private float boundsY;
 
-    private float floorPosX;
-    private float floorPosY;
-
     public virtual void Init(GameObject _coinObj)
     {
         coinAnim = _coinObj.GetComponentInChildren<Animator>();
@@ -61,9 +58,4 @@ public class Coin
 
     public virtual void Action() { }
 
-    public virtual void SetFloorPosition(Vector2 _floorPos)
-    {
-        floorPosX = _transform.localPosition.x;
-        floorPosY = _floorPos.y;
-    }
 }

@@ -129,7 +129,7 @@ public class FloorController
 
         floors[_index].GetTransform.position = floorPos;
 
-        floors[_index].SetPrevFloorDistance(randomDistance);
+        floors[_index].SetPrevFloorPos(floors[lastFloorIdx].GetTransform.position,randomDistance);
 
         lastFloorIdx = _index;
 

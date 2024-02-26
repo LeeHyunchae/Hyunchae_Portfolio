@@ -39,6 +39,8 @@ public class BaseObstacle
         boundsY = obstacleSprite.bounds.size.y;
     }
 
+    public virtual void ResetData() { }
+
     public virtual void SetSpeed(int _speed){}
 
     public virtual float GetWidth()
@@ -63,4 +65,10 @@ public class BaseObstacle
         floorPosX = _transform.localPosition.x;
         floorPosY = _floorPos.y;
     }
+
+    public virtual Vector2 GetPosition()
+    {
+        return _transform.position;
+    }
+
 }

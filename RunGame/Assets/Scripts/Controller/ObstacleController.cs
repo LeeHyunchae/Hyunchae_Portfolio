@@ -172,6 +172,21 @@ public class ObstacleController
         CheckObstaclePos();
 
         CheckFlyObstacleInterval();
+
+
+        //화살뭉치 박스그리기
+        //Debug.DrawLine(new Vector3(obstacles[frontFlyObstacleIdx].GetPosition().x - obstacles[frontFlyObstacleIdx].GetWidth() * 0.5f, obstacles[frontFlyObstacleIdx].GetPosition().y + obstacles[frontFlyObstacleIdx].GetHeight() * 0.5f, 1),
+        //    new Vector3(obstacles[frontFlyObstacleIdx].GetPosition().x + obstacles[frontFlyObstacleIdx].GetWidth() * 0.5f, obstacles[frontFlyObstacleIdx].GetPosition().y + obstacles[frontFlyObstacleIdx].GetHeight() * 0.5f, 1),Color.red);
+
+        //Debug.DrawLine(new Vector3(obstacles[frontFlyObstacleIdx].GetPosition().x - obstacles[frontFlyObstacleIdx].GetWidth() * 0.5f, obstacles[frontFlyObstacleIdx].GetPosition().y - obstacles[frontFlyObstacleIdx].GetHeight() * 0.5f, 1),
+        //    new Vector3(obstacles[frontFlyObstacleIdx].GetPosition().x + obstacles[frontFlyObstacleIdx].GetWidth() * 0.5f, obstacles[frontFlyObstacleIdx].GetPosition().y - obstacles[frontFlyObstacleIdx].GetHeight() * 0.5f, 1),Color.red);
+
+        //Debug.DrawLine(new Vector3(obstacles[frontFlyObstacleIdx].GetPosition().x - obstacles[frontFlyObstacleIdx].GetWidth() * 0.5f, obstacles[frontFlyObstacleIdx].GetPosition().y + obstacles[frontFlyObstacleIdx].GetHeight() * 0.5f, 1),
+        //    new Vector3(obstacles[frontFlyObstacleIdx].GetPosition().x - obstacles[frontFlyObstacleIdx].GetWidth() * 0.5f, obstacles[frontFlyObstacleIdx].GetPosition().y - obstacles[frontFlyObstacleIdx].GetHeight() * 0.5f, 1), Color.red);
+
+        //Debug.DrawLine(new Vector3(obstacles[frontFlyObstacleIdx].GetPosition().x + obstacles[frontFlyObstacleIdx].GetWidth() * 0.5f, obstacles[frontFlyObstacleIdx].GetPosition().y + obstacles[frontFlyObstacleIdx].GetHeight() * 0.5f, 1),
+        //    new Vector3(obstacles[frontFlyObstacleIdx].GetPosition().x + obstacles[frontFlyObstacleIdx].GetWidth() * 0.5f, obstacles[frontFlyObstacleIdx].GetPosition().y - obstacles[frontFlyObstacleIdx].GetHeight() * 0.5f, 1), Color.red);
+
     }
 
     public void FixedUpdate()
@@ -232,6 +247,8 @@ public class ObstacleController
                 obstacle.GetTransform.SetParent(obstacleParent);
 
                 obstacle.SetActive(false);
+
+                obstacle.ResetData();
             }
 
         }
@@ -282,8 +299,7 @@ public class ObstacleController
             }
             else
             {
-                //SetPosStrightPatternFloorObstacle(_rePosFloor);
-                SetPosRandomPatternObstacle(_rePosFloor);
+                SetPosStrightPatternFloorObstacle(_rePosFloor);
             }
 
             if (frontObstacles.Count == 0 && rePosObstacleList.Count > 0)
@@ -370,7 +386,6 @@ public class ObstacleController
             float minX = i * floorDivideSize + obstacle.GetWidth() * 0.5f - halfSize;
             float maxX = i * floorDivideSize + obstacle.GetWidth() * 0.5f + floorDivideSize - FLOOR_WIDTH_CORRECTION - halfSize;
             int posX = (int)(Random.Range(minX,maxX));
-            //float posX = (int)(obstaclePos.x - size * 0.5f + Random.Range(i * floorDivideSize + FLOOR_WIDTH_CORRECTION + obstacle.GetWidth() * 0.5f, i * floorDivideSize + floorDivideSize - obstacle.GetWidth() * 0.5f));
             float posY = (floor.GetFloorHeight() * 0.5f) + (obstacle.GetHeight() * 0.5f);
 
             obstaclePos.x = posX;
@@ -400,7 +415,7 @@ public class ObstacleController
 
         Vector2 obstaclePos = floor.GetTransform.position;
 
-        float startPosX = obstaclePos.x - size * 0.5f + Random.Range(FLOOR_WIDTH_CORRECTION, size - obstacleCount - FLOOR_WIDTH_CORRECTION);
+        float startPosX = (int)Random.Range(-size * 0.5f + FLOOR_WIDTH_CORRECTION, size * 0.5f - obstacleCount - FLOOR_WIDTH_CORRECTION);
 
         for (int i = 0; i < obstacleCount; i++)
         {
@@ -424,13 +439,13 @@ public class ObstacleController
 
             startPosX += obstacle.GetWidth() * 0.5f;
 
-            float posY = floor.GetTransform.position.y + (floor.GetFloorHeight() * 0.5f) + (obstacle.GetHeight() * 0.5f);
+            float posY = (floor.GetFloorHeight() * 0.5f) + (obstacle.GetHeight() * 0.5f);
 
             obstaclePos.x = startPosX;
             obstaclePos.y = posY;
 
             obstacle.GetTransform.SetParent(floor.GetTransform);
-            obstacle.GetTransform.position = obstaclePos;
+            obstacle.GetTransform.localPosition = obstaclePos;
 
             startPosX += obstacle.GetWidth() * 0.5f;
 
@@ -469,6 +484,8 @@ public class ObstacleController
         int obstacleCount = Random.Range(2, 5);
         int startPosY = Random.Range(-3, 7);
 
+        FlyObstacle[] flyobstacles = new FlyObstacle[obstacleCount];
+
         for (int i = 0; i<obstacleCount; i++)
         {
             BaseObstacle obstacle = obstacles[prevFlyObstacleIdx];
@@ -485,7 +502,16 @@ public class ObstacleController
             obstacle.SetActive(true);
 
             prevFlyObstacleIdx = (prevFlyObstacleIdx + 1) % OBSTACLE_CAPACITY + FLY_OBSTACLE_START_NUM;
+
+            flyobstacles[i] = (FlyObstacle)obstacle;
         }
+
+        Vector2 centerPos = flyobstacles[0].GetPosition();
+
+        centerPos.y = (flyobstacles[0].GetPosition().y + flyobstacles[obstacleCount - 1].GetPosition().y) * 0.5f;
+
+        flyobstacles[0].SetStrightCount(obstacleCount);
+        flyobstacles[0].SetStrightCenterPos(centerPos);
 
     }
     #endregion

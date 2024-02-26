@@ -17,10 +17,9 @@ public class JumpObstacle : BaseObstacle
     {
         base.Init(_obstacleObj);
         obstacleType = EObstacleType.JUMP;
-
-        jumpInterval = Random.Range(2, 3);
-
         posY = _transform.position.y;
+
+        ResetData();
     }
 
     public override void Action()
@@ -61,8 +60,14 @@ public class JumpObstacle : BaseObstacle
     public override void SetFloorPosition(Vector2 _floorPos)
     {
         base.SetFloorPosition(_floorPos);
+        
+    }
+
+    public override void ResetData()
+    {
+        base.ResetData();
+
         jumpInterval = Random.Range(1, 5);
         jumpHeight = Random.Range(0.1f, 0.15f);
-
     }
 }
