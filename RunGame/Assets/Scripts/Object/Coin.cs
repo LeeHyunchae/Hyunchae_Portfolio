@@ -21,12 +21,16 @@ public class Coin
 
     public Transform GetTransform => _transform;
     public bool GetActive => sprite.enabled;
+    public bool GetIsInScreen => isInScrenn;
     public ECoinType GetCoinType => coinType;
 
     public void SetActive(bool _active) => sprite.enabled = _active;
+    public void SetIsInScreen(bool _isInScreen) => isInScrenn = _isInScreen;
 
     private float boundsX;
     private float boundsY;
+
+    private bool isInScrenn;
 
     public virtual void Init(GameObject _coinObj)
     {

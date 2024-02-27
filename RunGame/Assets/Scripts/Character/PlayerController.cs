@@ -36,8 +36,8 @@ public class PlayerController
 
     private Transform playerTM;
     private Floor curFloor;
-    private List<BaseObstacle> curObstacles;
-    private List<Coin> curCoins;
+    private BaseObstacle[] obstacles;
+    private Coin[] coins;
     private Vector2 playerPos;
 
     public float GetPlayerHalfSize => PLAYERHALFSIZE;
@@ -158,14 +158,14 @@ public class PlayerController
         floorHeight = curFloor.GetFloorHeight();
     }
 
-    public void SetCurObstacle(List<BaseObstacle> _obstacles)
+    public void SetObstacles(BaseObstacle[] _obstacles)
     {
-        curObstacles = _obstacles;
+        obstacles = _obstacles;
     }
 
-    public void SetCurCoin(List<Coin> _coins)
+    public void SetCoins(Coin[] _coins)
     {
-        curCoins = _coins;
+        coins = _coins;
     }
 
     private void CheckGroundAABB()
@@ -196,18 +196,23 @@ public class PlayerController
 
     private void CheckObstacleAABB()
     {
-        if(curObstacles == null)
+        if(obstacles == null)
         {
             return;
         }
 
-        int count = curObstacles.Count;
+        int count = obstacles.Length;
 
         BaseObstacle obstacle;
 
         for(int i = 0; i < count; i++)
         {
-            obstacle = curObstacles[i];
+            obstacle = obstacles[i];
+
+            if(!obstacle.GetActive || !obstacle.GetIsInScreen)
+            {
+                continue;
+            }
 
             coinWidth = obstacle.GetWidth();
             coinHeight = obstacle.GetHeight();
@@ -229,18 +234,23 @@ public class PlayerController
 
     private void CheckCoinAABB()
     {
-        if (curCoins == null)
+        if (coins == null)
         {
             return;
         }
 
-        int count = curCoins.Count;
+        int count = coins.Length;
 
         Coin coin;
 
         for (int i = 0; i < count; i++)
         {
-            coin = curCoins[i];
+            coin = coins[i];
+
+            if(!coin.GetActive || !coin.GetIsInScreen)
+            {
+                continue;
+            }
 
             coinWidth = coin.GetWidth();
             coinHeight = coin.GetHeight();

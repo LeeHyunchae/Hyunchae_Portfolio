@@ -24,6 +24,8 @@ public class InGameSceneController : MonoBehaviour
         InitFloorCtrl();
 
         SetSpeedRate();
+        SetObstacles();
+        SetCoins();
     }
 
     private void InitPlayerCtrl()
@@ -45,18 +47,15 @@ public class InGameSceneController : MonoBehaviour
     private void InitObstacleCtrl()
     {
         obstacleCtrl = new ObstacleController();
-        obstacleCtrl.OnChangeCurObstacles = ChangeCurObstacle;
-        obstacleCtrl.SetScreenLeft(mainCam.ScreenToWorldPoint(new Vector3(0, 0, 0)).x);
+        obstacleCtrl.SetScreenLeftRight(mainCam.ScreenToWorldPoint(new Vector3(0, 0, 0)).x, mainCam.ScreenToWorldPoint(new Vector3(Screen.width,0,0)).x);
         obstacleCtrl.SetFlyObstacleInterval(flyObstacleInterval);
         obstacleCtrl.Init();
-        obstacleCtrl.SetPlayerHalfSize(playerCtrl.GetPlayerHalfSize);
     }
 
     private void InitCoinCtrl()
     {
         coinCtrl = new CoinController();
-        coinCtrl.OnChangeCurCoins = ChangeCurCoins;
-        coinCtrl.SetScreenLeft(mainCam.ScreenToWorldPoint(new Vector3(0, 0, 0)).x);
+        coinCtrl.SetScreenLeftRight(mainCam.ScreenToWorldPoint(new Vector3(0, 0, 0)).x, mainCam.ScreenToWorldPoint(new Vector3(Screen.width, 0, 0)).x);
         coinCtrl.Init();
         coinCtrl.SetPlayerHalfSize(playerCtrl.GetPlayerHalfSize);
     }
@@ -96,14 +95,14 @@ public class InGameSceneController : MonoBehaviour
         playerCtrl.SetCurFloor(_curFloor);
     }
 
-    private void ChangeCurObstacle(List<BaseObstacle> _obstacles)
+    private void SetObstacles()
     {
-        playerCtrl.SetCurObstacle(_obstacles);
+        playerCtrl.SetObstacles(obstacleCtrl.GetObstacles);
     }
 
-    private void ChangeCurCoins(List<Coin> _coins)
+    private void SetCoins()
     {
-        playerCtrl.SetCurCoin(_coins);
+        playerCtrl.SetCoins(coinCtrl.GetCoins);
     }
 
     private void OnRepositionFloor(Floor _floor)

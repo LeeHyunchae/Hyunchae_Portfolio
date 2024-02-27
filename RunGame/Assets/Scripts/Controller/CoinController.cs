@@ -22,6 +22,7 @@ public class CoinController
     private Coin[] coins;
 
     private float screenLeft;
+    private float screenRight;
 
     private float playerHalfSize = 0;
 
@@ -29,18 +30,20 @@ public class CoinController
 
     private Transform coinParent;
 
-    private List<Coin> frontCoins;
-    private Queue<Coin> curActivateCoins = new Queue<Coin>();
-
-    public Action<List<Coin>> OnChangeCurCoins;
-
-    public void SetScreenLeft(float _screenLeft) => screenLeft = _screenLeft;
 
     public void Init()
     {
         CreateCoins();
 
     }
+
+    public void SetScreenLeftRight(float _screenLeft, float _screenRight)
+    {
+        screenLeft = _screenLeft;
+        screenRight = _screenRight;
+    }
+
+    public Coin[] GetCoins => coins;
 
     private void CreateCoins()
     {
@@ -49,11 +52,9 @@ public class CoinController
         coinParent.transform.position = Vector2.zero;
 
         coins = new Coin[COIN_CAPACITY];
-        frontCoins = new List<Coin>();
 
         CreateCoinObject();
 
-        OnChangeCurCoins.Invoke(frontCoins);
 
     }
 
@@ -88,35 +89,10 @@ public class CoinController
     {
         CheckCoinPos();
 
-        //첫번째 코인 확인
-        Debug.DrawLine(new Vector3(curActivateCoins.Peek().GetTransform.position.x - curActivateCoins.Peek().GetWidth() * 0.5f, curActivateCoins.Peek().GetTransform.position.y + curActivateCoins.Peek().GetHeight() * 0.5f,0),
-            new Vector3(curActivateCoins.Peek().GetTransform.position.x + curActivateCoins.Peek().GetWidth() * 0.5f, curActivateCoins.Peek().GetTransform.position.y + curActivateCoins.Peek().GetHeight() * 0.5f, 0),Color.red);
-
-        Debug.DrawLine(new Vector3(curActivateCoins.Peek().GetTransform.position.x - curActivateCoins.Peek().GetWidth() * 0.5f, curActivateCoins.Peek().GetTransform.position.y - curActivateCoins.Peek().GetHeight() * 0.5f, 0),
-            new Vector3(curActivateCoins.Peek().GetTransform.position.x + curActivateCoins.Peek().GetWidth() * 0.5f, curActivateCoins.Peek().GetTransform.position.y - curActivateCoins.Peek().GetHeight() * 0.5f, 0), Color.red);
-
-        Debug.DrawLine(new Vector3(curActivateCoins.Peek().GetTransform.position.x - curActivateCoins.Peek().GetWidth() * 0.5f, curActivateCoins.Peek().GetTransform.position.y - curActivateCoins.Peek().GetHeight() * 0.5f, 0),
-            new Vector3(curActivateCoins.Peek().GetTransform.position.x - curActivateCoins.Peek().GetWidth() * 0.5f, curActivateCoins.Peek().GetTransform.position.y + curActivateCoins.Peek().GetHeight() * 0.5f, 0), Color.red);
-
-        Debug.DrawLine(new Vector3(curActivateCoins.Peek().GetTransform.position.x + curActivateCoins.Peek().GetWidth() * 0.5f, curActivateCoins.Peek().GetTransform.position.y - curActivateCoins.Peek().GetHeight() * 0.5f, 0),
-            new Vector3(curActivateCoins.Peek().GetTransform.position.x + curActivateCoins.Peek().GetWidth() * 0.5f, curActivateCoins.Peek().GetTransform.position.y + curActivateCoins.Peek().GetHeight() * 0.5f, 0), Color.red);
     }
 
     private void CheckCoinPos()
     {
-        if (curActivateCoins.Count > 0 && CheckFrontCoin(curActivateCoins.Peek()))
-        {
-            curActivateCoins.Dequeue();
-
-            if (OnChangeCurCoins != null)
-            {
-                frontCoins = curActivateCoins.ToList();
-
-                //frontCoins[0] = curActivateCoins.Peek();
-
-                OnChangeCurCoins.Invoke(frontCoins);
-            }
-        }
 
         for (int i = 0; i < COIN_CAPACITY; i++)
         {
@@ -127,33 +103,33 @@ public class CoinController
                 continue;
             }
 
-            if (CheckOutsideCoin(i))
+            if(CheckInScreenCoin(coin))
+            {
+                coin.SetIsInScreen(true);
+            }
+
+            if (CheckOutsideCoin(coin))
             {
                 coin.GetTransform.SetParent(coinParent);
 
                 coin.SetActive(false);
+                coin.SetIsInScreen(false);
             }
 
         }
     }
-    private bool CheckFrontCoin(Coin _coin)
+    private bool CheckInScreenCoin(Coin _coin)
     {
-        return _coin.GetTransform.position.x + _coin.GetWidth() * 0.5f + playerHalfSize <= Vector2.zero.x;
+        return _coin.GetTransform.position.x < screenRight;
     }
 
-    private bool CheckOutsideCoin(int _coinIdx)
+    private bool CheckOutsideCoin(Coin _coin)
     {
-        return coins[_coinIdx].GetTransform.position.x + coins[_coinIdx].GetWidth() * 0.5f <= screenLeft;
+        return _coin.GetTransform.position.x + _coin.GetWidth() * 0.5f <= screenLeft;
     }
 
     public void OnRepositionFloor(Floor _rePosFloor, List<BaseObstacle> _obstacles)
     {
-        if (frontCoins.Count == 0)
-        {
-            frontCoins.Add(coins[0]);
-            OnChangeCurCoins.Invoke(frontCoins);
-        }
-
         if (_rePosFloor.GetPrevFloorDistance > MIN_FLOOR_INTERVAL)
         {
             bool isSquarePattern = Random.value > 0.5f;
@@ -215,8 +191,6 @@ public class CoinController
             coin.GetTransform.localPosition = coinPos;
 
             coin.SetActive(true);
-
-            curActivateCoins.Enqueue(coin);
         }
 
     }
@@ -273,8 +247,6 @@ public class CoinController
             coin.GetTransform.localPosition = coinPos;
 
             coin.SetActive(true);
-
-            curActivateCoins.Enqueue(coin);
         }
 
     }
@@ -314,8 +286,6 @@ public class CoinController
             coin.GetTransform.position = coinPos;
 
             coin.SetActive(true);
-
-            curActivateCoins.Enqueue(coin);
         }
 
     }

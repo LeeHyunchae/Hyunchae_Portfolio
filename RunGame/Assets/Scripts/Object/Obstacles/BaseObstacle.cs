@@ -16,13 +16,16 @@ public class BaseObstacle
     protected Transform _transform;
     protected EObstacleType obstacleType;
     protected float obstacleSpeedRate = 8;
+    protected bool isInScreen = false;
 
     public Transform GetTransform => _transform;
     public bool GetActive => obstacleSprite.enabled;
+    public bool GetIsInScreen => isInScreen;
     public EObstacleType GetObstacleType => obstacleType;
     public float GetSpeedRate => obstacleSpeedRate;
 
     public void SetActive(bool _active) => obstacleSprite.enabled = _active;
+    public void SetIsInScreen(bool _isInScrenn) => isInScreen = _isInScrenn;
 
     protected float boundsX;
     protected float boundsY;
