@@ -44,8 +44,6 @@ public class ObstacleController
 
     private Transform obstacleParent;
 
-    public Action<BaseObstacle> OnRepositionObstacle;
-   
     public BaseObstacle[] GetObstacles => obstacles;
 
 

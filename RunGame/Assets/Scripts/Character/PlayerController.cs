@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -39,6 +40,8 @@ public class PlayerController
     private BaseObstacle[] obstacles;
     private Coin[] coins;
     private Vector2 playerPos;
+
+    public Action<ECoinType> OnGetCoin;
 
     public float GetPlayerHalfSize => PLAYERHALFSIZE;
 
@@ -265,6 +268,7 @@ public class PlayerController
             {
                 Debug.Log("동전 충돌!!");
                 coin.SetActive(false);
+                OnGetCoin.Invoke(coin.GetCoinType);
             }
         }
 

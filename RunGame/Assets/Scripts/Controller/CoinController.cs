@@ -260,8 +260,8 @@ public class CoinController
         int coinGrade = Random.Range(0, (int)ECoinType.END);
 
         Vector2 coinPos = _floor.GetTransform.position;
-        Debug.Log(coins[0].GetWidth());
         coinPos.x = coinPos.x - _floor.GetFloorWidth() * 0.5f - _floor.GetPrevFloorDistance * 0.5f - (squareSize * 0.5f);
+        coinPos.x -= coins[0].GetWidth() * 0.5f;
         coinPos.y = _floor.GetPrevFloorPos.y + squareSize + MIN_FLOOR_INTERVAL;
 
         float startPosY = coinPos.y;
