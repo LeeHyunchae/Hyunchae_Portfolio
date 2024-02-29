@@ -1,11 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 //랜덤액세스 3회이상이면 캐싱해주기
 
 public class InGameSceneController : MonoBehaviour
 {
+    [SerializeField] TextMeshProUGUI scoreText;
+    [SerializeField] CustomButton jumpBtn;
+
+    private const string SCORE = "Score : ";
+    private int playerScore = 0;
+
     private PlayerController playerCtrl;
     private FloorController floorCtrl;
     private ObstacleController obstacleCtrl;
@@ -13,6 +21,8 @@ public class InGameSceneController : MonoBehaviour
     private int curGameSpeed = 5;
     private float flyObstacleInterval = 3f;
     private Camera mainCam;
+
+    private bool isPlay = false;
 
     private void Awake()
     {
@@ -22,6 +32,7 @@ public class InGameSceneController : MonoBehaviour
         InitObstacleCtrl();
         InitCoinCtrl();
         InitFloorCtrl();
+        InitJumpBtn();
 
         SetSpeedRate();
         SetObstacles();
@@ -32,6 +43,7 @@ public class InGameSceneController : MonoBehaviour
     {
         playerCtrl = new PlayerController();
         playerCtrl.Init();
+        playerCtrl.OnGetCoin = OnPlayerGetCoin;
     }
 
     private void InitFloorCtrl()
@@ -62,11 +74,26 @@ public class InGameSceneController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if(!isPlay)
+        {
+            return;
+        }
         playerCtrl.FixedUpdate();
         obstacleCtrl.FixedUpdate();
     }
     private void Update()
     {
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            isPlay = !isPlay;
+            jumpBtn.SetEnable(isPlay);
+        }
+
+        if (!isPlay)
+        {
+            return;
+        }
+
         playerCtrl.Update();
         floorCtrl.Update();
         obstacleCtrl.Update();
@@ -111,4 +138,17 @@ public class InGameSceneController : MonoBehaviour
         coinCtrl.OnRepositionFloor(_floor,obstacles);
     }
 
+    private void OnPlayerGetCoin(ECoinType _coinType)
+    {
+        playerScore += (int)_coinType + 1;
+
+        scoreText.text = SCORE + playerScore;
+    }
+
+    private void InitJumpBtn()
+    {
+        jumpBtn.OnPointerClickEvent = playerCtrl.Jump;
+        jumpBtn.OnPointerDownEvent = playerCtrl.LongJump;
+        jumpBtn.SetEnable(isPlay);
+    }
 }

@@ -104,7 +104,7 @@ public class PlayerController
         }
     }
 
-    private void Jump()
+    public void Jump()
     {
         if (isGrounded)
         {
@@ -121,7 +121,7 @@ public class PlayerController
         }
     }
 
-    private void LongJump()
+    public void LongJump()
     {
         if(state != PlayerState.JUMPDOWN)
         {
@@ -266,7 +266,6 @@ public class PlayerController
                 coinPos.y - coinHeight * 0.3f < playerPos.y + PLAYERHALFSIZE &&
                 coinPos.y + coinHeight * 0.3f >= playerPos.y - PLAYERHALFSIZE)
             {
-                Debug.Log("동전 충돌!!");
                 coin.SetActive(false);
                 OnGetCoin.Invoke(coin.GetCoinType);
             }
