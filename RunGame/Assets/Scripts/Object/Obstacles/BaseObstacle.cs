@@ -22,7 +22,6 @@ public class BaseObstacle
     public bool GetActive => obstacleSprite.enabled;
     public bool GetIsInScreen => isInScreen;
     public EObstacleType GetObstacleType => obstacleType;
-    public float GetSpeedRate => obstacleSpeedRate;
 
     public void SetActive(bool _active) => obstacleSprite.enabled = _active;
     public void SetIsInScreen(bool _isInScrenn) => isInScreen = _isInScrenn;

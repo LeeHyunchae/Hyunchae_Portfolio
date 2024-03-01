@@ -24,9 +24,15 @@ public class InGameSceneController : MonoBehaviour
 
     private bool isPlay = false;
 
+    private float screenLeft;
+    private float screenRight;
+
     private void Awake()
     {
         mainCam = Camera.main;
+
+        screenLeft = mainCam.ScreenToWorldPoint(new Vector3(0, 0, 0)).x;
+        screenRight = mainCam.ScreenToWorldPoint(new Vector3(Screen.width, 0, 0)).x;
 
         InitPlayerCtrl();
         InitObstacleCtrl();
@@ -51,7 +57,7 @@ public class InGameSceneController : MonoBehaviour
         floorCtrl = new FloorController();
         floorCtrl.OnChaneCurFloor = ChangeCurFloor;
         floorCtrl.OnRepositionFloor = OnRepositionFloor;
-        floorCtrl.SetScreenLeft(mainCam.ScreenToWorldPoint(new Vector3(0, 0, 0)).x);
+        floorCtrl.SetScreenLeft(screenLeft);
         floorCtrl.Init();
         floorCtrl.SetPlayerHalfSize(playerCtrl.GetPlayerHalfSize);
         
@@ -59,7 +65,7 @@ public class InGameSceneController : MonoBehaviour
     private void InitObstacleCtrl()
     {
         obstacleCtrl = new ObstacleController();
-        obstacleCtrl.SetScreenLeftRight(mainCam.ScreenToWorldPoint(new Vector3(0, 0, 0)).x, mainCam.ScreenToWorldPoint(new Vector3(Screen.width,0,0)).x);
+        obstacleCtrl.SetScreenLeftRight(screenLeft, screenRight);
         obstacleCtrl.SetFlyObstacleInterval(flyObstacleInterval);
         obstacleCtrl.Init();
     }
@@ -67,9 +73,14 @@ public class InGameSceneController : MonoBehaviour
     private void InitCoinCtrl()
     {
         coinCtrl = new CoinController();
-        coinCtrl.SetScreenLeftRight(mainCam.ScreenToWorldPoint(new Vector3(0, 0, 0)).x, mainCam.ScreenToWorldPoint(new Vector3(Screen.width, 0, 0)).x);
+        coinCtrl.SetScreenLeftRight(screenLeft, screenRight);
         coinCtrl.Init();
-        coinCtrl.SetPlayerHalfSize(playerCtrl.GetPlayerHalfSize);
+    }
+    private void InitJumpBtn()
+    {
+        jumpBtn.OnPointerClickEvent = playerCtrl.Jump;
+        jumpBtn.OnPointerDownEvent = playerCtrl.LongJump;
+        jumpBtn.SetEnable(isPlay);
     }
 
     private void FixedUpdate()
@@ -83,6 +94,7 @@ public class InGameSceneController : MonoBehaviour
     }
     private void Update()
     {
+        //게임 일시정지
         if(Input.GetKeyDown(KeyCode.Space))
         {
             isPlay = !isPlay;
@@ -99,6 +111,7 @@ public class InGameSceneController : MonoBehaviour
         obstacleCtrl.Update();
         coinCtrl.Update();
 
+        //시간 경과에 따라 || 플레이어 피격 상황
         if(Input.GetKeyDown(KeyCode.RightArrow))
         {
             curGameSpeed++;
@@ -124,7 +137,7 @@ public class InGameSceneController : MonoBehaviour
 
     private void SetObstacles()
     {
-        playerCtrl.SetObstacles(obstacleCtrl.GetObstacles);
+        playerCtrl.SetObstacles(obstacleCtrl.GetObstacleArray);
     }
 
     private void SetCoins()
@@ -145,10 +158,4 @@ public class InGameSceneController : MonoBehaviour
         scoreText.text = SCORE + playerScore;
     }
 
-    private void InitJumpBtn()
-    {
-        jumpBtn.OnPointerClickEvent = playerCtrl.Jump;
-        jumpBtn.OnPointerDownEvent = playerCtrl.LongJump;
-        jumpBtn.SetEnable(isPlay);
-    }
 }

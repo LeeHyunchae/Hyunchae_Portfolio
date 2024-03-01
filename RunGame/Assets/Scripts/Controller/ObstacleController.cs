@@ -13,7 +13,7 @@ public class ObstacleController
 {
     private const string FIXED_OBSTACLE_PATH = "Prefabs/Obstacle";
     private const string FIXED_OBSTACLE_SPRITEPATH = "Sprites/Obstacle_";
-    private const string JUMP_OBSTACLE_PATH = "Prefabs/Enemy_BigDino";
+    private const string JUMP_OBSTACLE_PATH = "Prefabs/Enemy_SmallDino";
     private const string FLY_OBSTACLE_PATH = "Prefabs/Obstacle_Arrow";
 
     private const int OBSTACLE_CAPACITY = 30;
@@ -35,8 +35,8 @@ public class ObstacleController
     private float screenLeft;
     private float screenRight;
     private float floorReposX = 0;
-    private float flyObstacleInterval;
-    private float curFlyObstacleTime = 0f;
+    private float flyObstacleCreateInterval;
+    private float curFlyObstacleCreateTime = 0f;
 
     private int prevFixedObstacleIdx = FIXED_OBSTACLE_START_NUM;
     private int prevJumpObstacleIdx = JUMP_OBSTACLE_START_NUM;
@@ -44,8 +44,7 @@ public class ObstacleController
 
     private Transform obstacleParent;
 
-    public BaseObstacle[] GetObstacles => obstacles;
-
+    public BaseObstacle[] GetObstacleArray => obstacles;
 
     public void Init()
     {
@@ -53,40 +52,34 @@ public class ObstacleController
 
         InitObstacleSprites();
     }
+    #region Init && CreateObstacleGameObject
+
+    private void InitObstacles<T>(GameObject[] _obstacles) where T : BaseObstacle, new()
+    {
+        int curArrayCount = _obstacles.Length + obstacleCount;
+
+        for (int i = obstacleCount; i < curArrayCount; i++)
+        {
+            BaseObstacle obstacle = new T();
+
+            obstacle.Init(_obstacles[i - obstacleCount]);
+            obstacle.SetActive(false);
+
+            obstacles[i] = obstacle;
+        }
+
+        obstacleCount += _obstacles.Length;
+    }
 
     public void InitObstacleSprites()
     {
         fixedObstacleSprites = new Sprite[SPRITECOUNT];
 
-        for(int i = 0; i<SPRITECOUNT;i++)
+        for (int i = 0; i < SPRITECOUNT; i++)
         {
             fixedObstacleSprites[i] = Resources.Load<Sprite>(FIXED_OBSTACLE_SPRITEPATH + i);
-
         }
     }
-
-    public void SetScreenLeftRight(float _screenLeft, float _screenRight)
-    {
-        screenLeft = _screenLeft;
-        screenRight = _screenRight;
-    }
-
-    public void SetSpeedRate(int _speed)
-    {
-        int count = obstacles.Length;
-        int firstFlyObstacleIdx = FLY_OBSTACLE_START_NUM;
-
-        for (int i = firstFlyObstacleIdx; i < count; i++)
-        {
-            BaseObstacle obstacle = obstacles[i];
-
-            if (obstacle.GetObstacleType == EObstacleType.FLY)
-            {
-                obstacle.SetSpeed(_speed);
-            }
-        }
-    }
-
     private void CreateObstacles()
     {
         obstacleParent = new GameObject("Obstacles").transform;
@@ -101,7 +94,6 @@ public class ObstacleController
         CreateFlyObstacle();
     }
 
-    #region CreateObstacleGameObject
     private void CreateFixedObstacles()
     {
         GameObject originObstacleObj = (GameObject)Resources.Load(FIXED_OBSTACLE_PATH);
@@ -144,21 +136,26 @@ public class ObstacleController
 
     #endregion
 
-    private void InitObstacles<T>(GameObject[] _obstacles) where T : BaseObstacle , new()
+    public void SetScreenLeftRight(float _screenLeft, float _screenRight)
     {
-        int curArrayCount = _obstacles.Length + obstacleCount;
+        screenLeft = _screenLeft;
+        screenRight = _screenRight;
+    }
 
-        for (int i = obstacleCount; i <  curArrayCount; i++)
+    public void SetSpeedRate(int _speed)
+    {
+        int count = obstacles.Length;
+        int firstFlyObstacleIdx = FLY_OBSTACLE_START_NUM;
+
+        for (int i = firstFlyObstacleIdx; i < count; i++)
         {
-            BaseObstacle obstacle = new T();
+            BaseObstacle obstacle = obstacles[i];
 
-            obstacle.Init(_obstacles[i - obstacleCount]);
-            obstacle.SetActive(false);
-
-            obstacles[i] = obstacle;
+            if (obstacle.GetObstacleType == EObstacleType.FLY)
+            {
+                obstacle.SetSpeed(_speed);
+            }
         }
-
-        obstacleCount += _obstacles.Length;
     }
 
     public void Update()
@@ -166,20 +163,6 @@ public class ObstacleController
         CheckObstaclePos();
 
         CheckFlyObstacleInterval();
-
-
-        //화살뭉치 박스그리기
-        //Debug.DrawLine(new Vector3(obstacles[frontFlyObstacleIdx].GetPosition().x - obstacles[frontFlyObstacleIdx].GetWidth() * 0.5f, obstacles[frontFlyObstacleIdx].GetPosition().y + obstacles[frontFlyObstacleIdx].GetHeight() * 0.5f, 1),
-        //    new Vector3(obstacles[frontFlyObstacleIdx].GetPosition().x + obstacles[frontFlyObstacleIdx].GetWidth() * 0.5f, obstacles[frontFlyObstacleIdx].GetPosition().y + obstacles[frontFlyObstacleIdx].GetHeight() * 0.5f, 1),Color.red);
-
-        //Debug.DrawLine(new Vector3(obstacles[frontFlyObstacleIdx].GetPosition().x - obstacles[frontFlyObstacleIdx].GetWidth() * 0.5f, obstacles[frontFlyObstacleIdx].GetPosition().y - obstacles[frontFlyObstacleIdx].GetHeight() * 0.5f, 1),
-        //    new Vector3(obstacles[frontFlyObstacleIdx].GetPosition().x + obstacles[frontFlyObstacleIdx].GetWidth() * 0.5f, obstacles[frontFlyObstacleIdx].GetPosition().y - obstacles[frontFlyObstacleIdx].GetHeight() * 0.5f, 1),Color.red);
-
-        //Debug.DrawLine(new Vector3(obstacles[frontFlyObstacleIdx].GetPosition().x - obstacles[frontFlyObstacleIdx].GetWidth() * 0.5f, obstacles[frontFlyObstacleIdx].GetPosition().y + obstacles[frontFlyObstacleIdx].GetHeight() * 0.5f, 1),
-        //    new Vector3(obstacles[frontFlyObstacleIdx].GetPosition().x - obstacles[frontFlyObstacleIdx].GetWidth() * 0.5f, obstacles[frontFlyObstacleIdx].GetPosition().y - obstacles[frontFlyObstacleIdx].GetHeight() * 0.5f, 1), Color.red);
-
-        //Debug.DrawLine(new Vector3(obstacles[frontFlyObstacleIdx].GetPosition().x + obstacles[frontFlyObstacleIdx].GetWidth() * 0.5f, obstacles[frontFlyObstacleIdx].GetPosition().y + obstacles[frontFlyObstacleIdx].GetHeight() * 0.5f, 1),
-        //    new Vector3(obstacles[frontFlyObstacleIdx].GetPosition().x + obstacles[frontFlyObstacleIdx].GetWidth() * 0.5f, obstacles[frontFlyObstacleIdx].GetPosition().y - obstacles[frontFlyObstacleIdx].GetHeight() * 0.5f, 1), Color.red);
 
     }
 
@@ -190,7 +173,9 @@ public class ObstacleController
 
     private void OnActionObstacle()
     {
-        for(int i = 0; i<obstacleCount; i++)
+        int firstActionObstacleIdx = JUMP_OBSTACLE_START_NUM;
+
+        for (int i = firstActionObstacleIdx; i< obstacleCount ; i++)
         {
             BaseObstacle obstacle = obstacles[i];
 
@@ -242,11 +227,11 @@ public class ObstacleController
 
     private void CheckFlyObstacleInterval()
     {
-        curFlyObstacleTime += Time.deltaTime;
+        curFlyObstacleCreateTime += Time.deltaTime;
 
-        if(curFlyObstacleTime >= flyObstacleInterval)
+        if(curFlyObstacleCreateTime >= flyObstacleCreateInterval)
         {
-            curFlyObstacleTime = 0;
+            curFlyObstacleCreateTime = 0;
 
             RepositionFlyObstacle();
         }
@@ -296,12 +281,11 @@ public class ObstacleController
         {
             SetPosStrightPatternFlyObstacle();
         }
-
     }
 
     public void SetFlyObstacleInterval(float _intervalTime)
     {
-        flyObstacleInterval = _intervalTime;
+        flyObstacleCreateInterval = _intervalTime;
     }
 
 

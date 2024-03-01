@@ -24,8 +24,6 @@ public class CoinController
     private float screenLeft;
     private float screenRight;
 
-    private float playerHalfSize = 0;
-
     private int prevCoinIdx;
 
     private Transform coinParent;
@@ -35,6 +33,19 @@ public class CoinController
     {
         CreateCoins();
 
+    }
+    private void InitCoins(GameObject[] _coins)
+    {
+
+        for (int i = 0; i < COIN_CAPACITY; i++)
+        {
+            Coin coin = new Coin();
+
+            coin.Init(_coins[i]);
+            coin.SetActive(false);
+
+            coins[i] = coin;
+        }
     }
 
     public void SetScreenLeftRight(float _screenLeft, float _screenRight)
@@ -54,8 +65,6 @@ public class CoinController
         coins = new Coin[COIN_CAPACITY];
 
         CreateCoinObject();
-
-
     }
 
     private void CreateCoinObject()
@@ -70,30 +79,13 @@ public class CoinController
 
         InitCoins(coinObjs);
     }
-
-    private void InitCoins(GameObject[] _coins)
-    {
-
-        for (int i = 0; i < COIN_CAPACITY; i++)
-        {
-            Coin coin = new Coin();
-
-            coin.Init(_coins[i]);
-            coin.SetActive(false);
-
-            coins[i] = coin;
-        }
-    }
-
     public void Update()
     {
         CheckCoinPos();
-
     }
 
     private void CheckCoinPos()
     {
-
         for (int i = 0; i < COIN_CAPACITY; i++)
         {
             Coin coin = coins[i];
@@ -115,7 +107,6 @@ public class CoinController
                 coin.SetActive(false);
                 coin.SetIsInScreen(false);
             }
-
         }
     }
     private bool CheckInScreenCoin(Coin _coin)
@@ -134,12 +125,10 @@ public class CoinController
         {
             bool isSquarePattern = Random.value > 0.5f;
 
-            SetPosSquarePattern(_rePosFloor);
-
-            //if (isSquarePattern)
-            //{
-            //    SetPosSquarePattern(_rePosFloor);
-            //}
+            if (isSquarePattern)
+            {
+                SetPosSquarePattern(_rePosFloor);
+            }
         }
 
         if (_obstacles.Count == 0)
@@ -150,15 +139,9 @@ public class CoinController
         {
             SetPosObstaclePattern(_rePosFloor, _obstacles);
         }
-
-
     }
 
-    public void SetPlayerHalfSize(float _halfSize)
-    {
-        playerHalfSize = _halfSize;
-    }
-
+    #region Patterns
     private void SetPosStrightRandomCoinPattern(Floor _floor)
     {
         Floor floor = _floor;
@@ -289,4 +272,5 @@ public class CoinController
         }
 
     }
+    #endregion
 }

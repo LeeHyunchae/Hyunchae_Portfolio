@@ -60,7 +60,6 @@ public class JumpObstacle : BaseObstacle
     public override void SetFloorPosition(Vector2 _floorPos)
     {
         base.SetFloorPosition(_floorPos);
-        
     }
 
     public override void ResetData()

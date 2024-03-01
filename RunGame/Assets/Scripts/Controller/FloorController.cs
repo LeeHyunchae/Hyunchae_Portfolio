@@ -9,9 +9,8 @@ using Random = UnityEngine.Random;
 // transform.position 가능하면 curPos같은걸로 캐싱해서 사용하기
 // Camera.main 피하기(캐싱해서 사용하기) //
 // 수식 변수화하기 //
-// Rect 사용하기(AABB)
+// Rect 사용하기(AABB) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 플로어 관련 클래스들 구조 변경하기
-// 장애물 추가하기
 
 public class FloorController
 {
@@ -45,10 +44,35 @@ public class FloorController
 
         InitFloorPos();
     }
-
-    public void SetSpeedRate(int _speed)
+    private void InitFloor(GameObject[] _floors)
     {
-        speedRate = _speed;
+        floorCount = _floors.Length;
+
+        floors = new Floor[floorCount];
+
+        for (int i = 0; i < floorCount; i++)
+        {
+            int floorIdx = i;
+
+            floors[floorIdx] = new Floor();
+            floors[floorIdx].Init(_floors[floorIdx]);
+        }
+    }
+    private void InitFloorPos()
+    {
+        for (int i = 0; i < floorCount; i++)
+        {
+            int floorIdx = i;
+
+            if (floorIdx == 0)
+            {
+                SetFirstFloor(floorIdx);
+            }
+            else
+            {
+                RepositionFloor(floorIdx);
+            }
+        }
     }
 
     private void CreateFloor()
@@ -62,25 +86,15 @@ public class FloorController
 
         for (int i = 0; i < FLOORCOUNT; i++)
         {
-            floorObjs[i] = GameObject.Instantiate<GameObject>(originFloor, Vector2.zero, Quaternion.identity,floorParent);
+            floorObjs[i] = GameObject.Instantiate<GameObject>(originFloor, Vector2.zero, Quaternion.identity, floorParent);
         }
 
         InitFloor(floorObjs);
     }
 
-    private void InitFloor(GameObject[] _floors)
+    public void SetSpeedRate(int _speed)
     {
-        floorCount = _floors.Length;
-
-        floors = new Floor[floorCount];
-
-        for(int i = 0; i<floorCount; i++)
-        {
-            int floorIdx = i;
-
-            floors[floorIdx] = new Floor();
-            floors[floorIdx].Init(_floors[floorIdx]);
-        }
+        speedRate = _speed;
     }
 
     public void Update()
@@ -135,24 +149,7 @@ public class FloorController
 
         if(OnRepositionFloor != null)
         {
-            OnRepositionFloor(floors[_index]);
-        }
-    }
-
-    private void InitFloorPos()
-    {
-        for(int i = 0; i<floorCount;i++)
-        {
-            int floorIdx = i;
-
-            if(floorIdx == 0)
-            {
-                SetFirstFloor(floorIdx);
-            }
-            else
-            {
-                RepositionFloor(floorIdx);
-            }
+            OnRepositionFloor.Invoke(floors[_index]);
         }
     }
 
@@ -184,17 +181,6 @@ public class FloorController
     {
         return floors[_idx].GetTransform.position.x + floors[_idx].GetFloorWidth() <= screenLeft;
     }
-
-    public Floor GetFrontFloor()
-    {
-        return floors[frontFloorIdx];
-    }
-
-    public Floor[] GetAllfFloor()
-    {
-        return floors;
-    }
-
     public void SetPlayerHalfSize(float _halfSize)
     {
         playerHalfSize = _halfSize;

@@ -116,7 +116,6 @@ public class PlayerController
         {
             isDoubleJump = true;
             shortJumpPower = shortJumpHeight;
-            Debug.Log("더블점프");
             ChangeState(PlayerState.JUMPUP);
         }
     }
