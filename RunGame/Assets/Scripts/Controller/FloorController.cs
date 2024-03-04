@@ -4,14 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-// new Vector 지우기 //
-// 약어 수정하기 //
-// transform.position 가능하면 curPos같은걸로 캐싱해서 사용하기
-// Camera.main 피하기(캐싱해서 사용하기) //
-// 수식 변수화하기 //
-// Rect 사용하기(AABB) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// 플로어 관련 클래스들 구조 변경하기
-
 public class FloorController
 {
     private const int INITSPEED = 3;
@@ -20,6 +12,8 @@ public class FloorController
     private const string FLOORPATH = "Prefabs/Floor";
     private const int FLOORCOUNT = 10;
     private const int FIRSTFLOORSIZE = 20;
+    private const int MIN_FLOOR_HEIGHT = -4;
+    private const int MAX_FLOOR_HEIGHT = 4;
 
     private Floor[] floors;
     private int floorCount;
@@ -64,6 +58,7 @@ public class FloorController
         {
             int floorIdx = i;
 
+            //.. TODO :: first / reposition 통합 -> for loop 1부터 시작 -> 시작값 세팅 for loop 위로
             if (floorIdx == 0)
             {
                 SetFirstFloor(floorIdx);
@@ -139,7 +134,7 @@ public class FloorController
         int randomDistance = Random.Range(MININTERVAL, MAXINTERVAL);
 
         floorPos.x = floors[lastFloorIdx].GetTransform.position.x + floors[lastFloorIdx].GetFloorWidth() * 0.5f + randomDistance + floors[_index].GetFloorWidth() * 0.5f;
-        floorPos.y = Random.Range(-4, 4);
+        floorPos.y = Random.Range(MIN_FLOOR_HEIGHT, MAX_FLOOR_HEIGHT);
 
         floors[_index].GetTransform.position = floorPos;
 

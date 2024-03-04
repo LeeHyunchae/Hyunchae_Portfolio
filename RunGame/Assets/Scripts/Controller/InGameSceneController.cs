@@ -4,8 +4,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-//랜덤액세스 3회이상이면 캐싱해주기
-
 public class InGameSceneController : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI scoreText;

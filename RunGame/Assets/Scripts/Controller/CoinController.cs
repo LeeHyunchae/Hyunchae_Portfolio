@@ -1,15 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
-
-public enum ECoinPosType
-{
-    FLOOR = 0,
-    PATTERN = 1
-}
 
 public class CoinController
 {
@@ -161,6 +154,7 @@ public class CoinController
 
             Vector2 coinPos = floor.GetTransform.position;
 
+            //.. TODO :: ??? ?? 
             float result = -(size * 0.5f) + i;
             coinPos.x = (result < 0) ? (int)(result) : (int)(result + 0.5f);
 
@@ -205,6 +199,8 @@ public class CoinController
             Vector2 coinPos = floor.GetTransform.position;
 
             float result = -(size * 0.5f) + i;
+
+            //.. TODO :: ???? int casting ??
             coinPos.x = (result < 0) ? (int)(result) : (int)(result + 0.5f);
 
             if (size % 2 != 0)
@@ -243,6 +239,8 @@ public class CoinController
         int coinGrade = Random.Range(0, (int)ECoinType.END);
 
         Vector2 coinPos = _floor.GetTransform.position;
+
+        //.. TODO :: ?? ??
         coinPos.x = coinPos.x - _floor.GetFloorWidth() * 0.5f - _floor.GetPrevFloorDistance * 0.5f - (squareSize * 0.5f);
         coinPos.x -= coins[0].GetWidth() * 0.5f;
         coinPos.y = _floor.GetPrevFloorPos.y + squareSize + MIN_FLOOR_INTERVAL;

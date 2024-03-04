@@ -17,26 +17,23 @@ public class PlayerController
     private const string PLAYERSTATE = "PlayerState";
     private const float GRAVITY = 0.45f;
     private const float LONGJUMPPOWER = 0.125f;
+    private const float SHORTJUMPPOWER = 0.225f;
+    private const int PLAYERSIZE = 1;
     private const float PLAYERHALFSIZE = 0.5f;
     private const string PLAYERPATH = "Prefabs/Player";
-    private const float PLAYER_HEIGHT_COLLECTION_VALUE = 0.1f;
-    private const float FLOOR_HEIGHT_COLLECTION_VALUE = 0.2f;
+    private const float AABB_COLLECTION_VALUE = 0.25f;
 
     private bool isGrounded;
     private bool isDoubleJump;
 
-    private float shortJumpPower = 0;
-    private float shortJumpHeight = 0.225f;
+    private float curShortJumpPower = 0;
     private float curLongJumpPower = 0;
-    private float floorWidth = 0;
-    private float floorHeight = 0;
-    private float coinWidth = 0;
-    private float coinHeight = 0;
 
     private PlayerState state;
 
     private Transform playerTM;
     private Floor curFloor;
+    private float floorLandPosY;
     private BaseObstacle[] obstacles;
     private Coin[] coins;
     private Vector2 playerPos;
@@ -65,12 +62,10 @@ public class PlayerController
         {
             Jump();
         }
-        else if (Input.GetKey(KeyCode.UpArrow) && shortJumpPower > 0)
+        else if (Input.GetKey(KeyCode.UpArrow) && curShortJumpPower > 0)
         {
             LongJump();
         }
-
-
     }
 
     public void FixedUpdate()
@@ -80,7 +75,7 @@ public class PlayerController
             OnJumping();
         }
 
-        playerPos.y += shortJumpPower + curLongJumpPower;
+        playerPos.y += curShortJumpPower + curLongJumpPower;
 
         playerTM.position = playerPos;
 
@@ -96,9 +91,9 @@ public class PlayerController
 
     private void OnJumping()
     {
-        shortJumpPower -= GRAVITY * Time.deltaTime;
+        curShortJumpPower -= GRAVITY * Time.deltaTime;
 
-        if (shortJumpPower < 0 && state != PlayerState.JUMPDOWN)
+        if (curShortJumpPower < 0 && state != PlayerState.JUMPDOWN)
         {
             ChangeState(PlayerState.JUMPDOWN);
         }
@@ -108,14 +103,14 @@ public class PlayerController
     {
         if (isGrounded)
         {
-            shortJumpPower = shortJumpHeight;
+            curShortJumpPower = SHORTJUMPPOWER;
             ChangeState(PlayerState.JUMPUP);
             return;
         }
         else if(!isDoubleJump)
         {
             isDoubleJump = true;
-            shortJumpPower = shortJumpHeight;
+            curShortJumpPower = SHORTJUMPPOWER;
             ChangeState(PlayerState.JUMPUP);
         }
     }
@@ -131,14 +126,14 @@ public class PlayerController
 
     private void Land()
     {
-        shortJumpPower = 0;
+        curShortJumpPower = 0;
         curLongJumpPower = 0;
         isDoubleJump = false;
 
         ChangeState(PlayerState.WALK);
 
         playerPos = playerTM.position;
-        playerPos.y = (int)(curFloor.GetTransform.position.y + curFloor.GetFloorHeight() * 0.5f + PLAYERHALFSIZE);
+        playerPos.y = floorLandPosY;
         playerTM.position = playerPos;
     }
 
@@ -156,8 +151,7 @@ public class PlayerController
     public void SetCurFloor(Floor _floor)
     {
         curFloor = _floor;
-        floorWidth = curFloor.GetFloorWidth();
-        floorHeight = curFloor.GetFloorHeight();
+        floorLandPosY = curFloor.GetTransform.position.y + curFloor.GetFloorHeight() * 0.5f + PLAYERHALFSIZE;
     }
 
     public void SetObstacles(BaseObstacle[] _obstacles)
@@ -172,27 +166,29 @@ public class PlayerController
 
     private void CheckGroundAABB()
     {
-        if(shortJumpPower > 0 || curFloor == null)
+        if(curShortJumpPower > 0 || curFloor == null)
         {
             isGrounded = false;
             return;
         }
 
         Vector2 playerPos = playerTM.position;
-        Vector2 floorPos = curFloor.GetTransform.position;
 
-        if (floorPos.x - floorWidth * 0.5 < playerPos.x + PLAYERHALFSIZE &&
-            floorPos.x + floorWidth * 0.5f > playerPos.x - PLAYERHALFSIZE &&
-            floorPos.y + floorHeight * FLOOR_HEIGHT_COLLECTION_VALUE < playerPos.y - PLAYERHALFSIZE + PLAYER_HEIGHT_COLLECTION_VALUE &&
-            floorPos.y + floorHeight * 0.5f >= playerPos.y - PLAYERHALFSIZE)
+        if(playerPos.y == floorLandPosY)
         {
             isGrounded = true;
-            
+            return;
         }
-        else
-        {
-            isGrounded = false;
-        }
+
+        Vector2 floorPos = curFloor.GetTransform.position;
+
+        float floorWidthHalf = curFloor.GetFloorWidth() * 0.5f;
+        float floorHeightHalf = curFloor.GetFloorHeight() * 0.5f;
+
+        Rect playerRect = new Rect(playerPos.x - PLAYERHALFSIZE, playerPos.y - PLAYERHALFSIZE + AABB_COLLECTION_VALUE, PLAYERSIZE, AABB_COLLECTION_VALUE);
+        Rect floorRect = new Rect(floorPos.x - floorWidthHalf, floorPos.y + floorHeightHalf, curFloor.GetFloorWidth(), AABB_COLLECTION_VALUE);
+
+        isGrounded = playerRect.Overlaps(floorRect);
 
     }
 
@@ -207,6 +203,10 @@ public class PlayerController
 
         BaseObstacle obstacle;
 
+        Vector2 playerPos = playerTM.position;
+        Rect playerRect = new Rect(playerPos.x - PLAYERHALFSIZE, playerPos.y + PLAYERHALFSIZE, PLAYERSIZE, PLAYERSIZE);
+        Rect obstacleRect = new Rect();
+
         for(int i = 0; i < count; i++)
         {
             obstacle = obstacles[i];
@@ -215,19 +215,16 @@ public class PlayerController
             {
                 continue;
             }
-
-            coinWidth = obstacle.GetWidth();
-            coinHeight = obstacle.GetHeight();
-
-            Vector2 playerPos = playerTM.position;
             Vector2 obstaclePos = obstacle.GetPosition();
 
-            if (obstaclePos.x - coinWidth * 0.5 < playerPos.x + PLAYERHALFSIZE &&
-                obstaclePos.x + coinWidth * 0.5f > playerPos.x - PLAYERHALFSIZE &&
-                obstaclePos.y - coinHeight * 0.5f < playerPos.y + PLAYERHALFSIZE &&
-                obstaclePos.y + coinHeight * 0.5f >= playerPos.y - PLAYERHALFSIZE)
+            float obstacleWidthHalf = obstacle.GetWidth() * 0.5f;
+            float obstacleHeightHalf = obstacle.GetHeight() * 0.5f;
+
+            obstacleRect.Set(obstaclePos.x - obstacleWidthHalf , obstaclePos.y + obstacleHeightHalf, obstacle.GetWidth(), obstacle.GetHeight());
+
+            if (playerRect.Overlaps(obstacleRect))
             {
-                Debug.Log("장애물 충돌!!");
+                Debug.Log("장애물 충돌!");
             }
         }
 
@@ -245,6 +242,10 @@ public class PlayerController
 
         Coin coin;
 
+        Vector2 playerPos = playerTM.position;
+        Rect playerRect = new Rect(playerPos.x - PLAYERHALFSIZE, playerPos.y + PLAYERHALFSIZE, PLAYERSIZE, PLAYERSIZE);
+        Rect coinRect = new Rect();
+
         for (int i = 0; i < count; i++)
         {
             coin = coins[i];
@@ -254,16 +255,15 @@ public class PlayerController
                 continue;
             }
 
-            coinWidth = coin.GetWidth();
-            coinHeight = coin.GetHeight();
-
-            Vector2 playerPos = playerTM.position;
             Vector2 coinPos = coin.GetTransform.position;
 
-            if (coinPos.x - coinWidth * 0.3f < playerPos.x + PLAYERHALFSIZE &&
-                coinPos.x + coinWidth * 0.3f > playerPos.x - PLAYERHALFSIZE &&
-                coinPos.y - coinHeight * 0.3f < playerPos.y + PLAYERHALFSIZE &&
-                coinPos.y + coinHeight * 0.3f >= playerPos.y - PLAYERHALFSIZE)
+            float coinWidthHalf = coin.GetWidth() * 0.5f;
+            float coinHeightHalf = coin.GetHeight() * 0.5f;
+
+            //.. TODO :: 수식 정리
+            coinRect.Set(coinPos.x - coinWidthHalf + AABB_COLLECTION_VALUE * 2, coinPos.y + coinHeightHalf - AABB_COLLECTION_VALUE * 2, coin.GetWidth() - AABB_COLLECTION_VALUE, coin.GetHeight() - AABB_COLLECTION_VALUE);
+
+            if(playerRect.Overlaps(coinRect))
             {
                 coin.SetActive(false);
                 OnGetCoin.Invoke(coin.GetCoinType);

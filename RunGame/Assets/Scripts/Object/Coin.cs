@@ -60,6 +60,4 @@ public class Coin
         coinAnim.SetInteger(COINGRADE, (int)coinType);
     }
 
-    public virtual void Action() { }
-
 }

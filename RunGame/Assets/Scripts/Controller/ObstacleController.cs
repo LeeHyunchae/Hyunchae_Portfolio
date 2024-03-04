@@ -3,12 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public enum EObstaclePosType
-{
-    FLOOR = 0,
-    FLY = 1
-}
-
 public class ObstacleController
 {
     private const string FIXED_OBSTACLE_PATH = "Prefabs/Obstacle";
@@ -290,6 +284,7 @@ public class ObstacleController
 
 
     #region Patterns
+
     private void SetPosRandomPatternObstacle(Floor _floor)
     {
         Floor floor = _floor;

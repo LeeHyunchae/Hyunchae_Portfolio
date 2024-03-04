@@ -4,7 +4,12 @@ using UnityEngine;
 
 public class JumpObstacle : BaseObstacle
 {
-    private const float GRAVITY = 0.15f; 
+    private const float GRAVITY = 0.15f;
+    private const int MININTERVAL = 1;
+    private const int MAXINTERVAL = 5;
+    private const float MIN_JUMP_HEIGHT = 0.1f;
+    private const float MAX_JUMP_HEIGHT = 0.15f;
+
     private float jumpHeight = 0.1f;
     private float jumpPower = 0;
 
@@ -66,7 +71,7 @@ public class JumpObstacle : BaseObstacle
     {
         base.ResetData();
 
-        jumpInterval = Random.Range(1, 5);
-        jumpHeight = Random.Range(0.1f, 0.15f);
+        jumpInterval = Random.Range(MININTERVAL, MAXINTERVAL);
+        jumpHeight = Random.Range(MIN_JUMP_HEIGHT, MAX_JUMP_HEIGHT);
     }
 }
