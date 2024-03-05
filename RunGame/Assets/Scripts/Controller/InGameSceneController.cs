@@ -41,6 +41,7 @@ public class InGameSceneController : MonoBehaviour
         SetSpeedRate();
         SetObstacles();
         SetCoins();
+
     }
 
     private void InitPlayerCtrl()

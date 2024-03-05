@@ -17,6 +17,7 @@ public class JumpObstacle : BaseObstacle
     private float jumpTime = 0;
     private bool isJumping = false;
     private float posY;
+    private Vector2 obstacleLocalPos;
 
     public override void Init(GameObject _obstacleObj)
     {
@@ -24,6 +25,10 @@ public class JumpObstacle : BaseObstacle
         obstacleType = EObstacleType.JUMP;
         posY = _transform.position.y;
 
+        boundsX = obstacleSprite.bounds.size.x;
+        boundsY = obstacleSprite.bounds.size.y;
+
+        obstacleLocalPos = _transform.position;
         ResetData();
     }
 
@@ -44,7 +49,10 @@ public class JumpObstacle : BaseObstacle
 
             posY += jumpPower;
 
-            _transform.localPosition = new Vector2(floorPosX,floorPosY + posY);
+            obstacleLocalPos.x = floorPosX;
+            obstacleLocalPos.y = floorPosY + posY;
+
+            _transform.localPosition = obstacleLocalPos;
         }
 
         if(jumpTime >= jumpInterval && !isJumping)
@@ -57,14 +65,13 @@ public class JumpObstacle : BaseObstacle
         if(_transform.localPosition.y <= floorPosY && jumpPower < 0)
         {
             isJumping = false;
-            _transform.localPosition = new Vector2(floorPosX, floorPosY);
+
+            obstacleLocalPos.x = floorPosX;
+            obstacleLocalPos.y = floorPosY;
+
+            _transform.localPosition = obstacleLocalPos;
         }    
 
-    }
-
-    public override void SetFloorPosition(Vector2 _floorPos)
-    {
-        base.SetFloorPosition(_floorPos);
     }
 
     public override void ResetData()

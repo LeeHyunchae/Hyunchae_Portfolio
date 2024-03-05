@@ -260,8 +260,12 @@ public class PlayerController
             float coinWidthHalf = coin.GetWidth() * 0.5f;
             float coinHeightHalf = coin.GetHeight() * 0.5f;
 
-            //.. TODO :: 수식 정리
-            coinRect.Set(coinPos.x - coinWidthHalf + AABB_COLLECTION_VALUE * 2, coinPos.y + coinHeightHalf - AABB_COLLECTION_VALUE * 2, coin.GetWidth() - AABB_COLLECTION_VALUE, coin.GetHeight() - AABB_COLLECTION_VALUE);
+            float coinRectX = coinPos.x - coinWidthHalf + AABB_COLLECTION_VALUE * 2;
+            float coinRectY = coinPos.y + coinHeightHalf - AABB_COLLECTION_VALUE * 2;
+            float coinRectWidth = coin.GetWidth() - AABB_COLLECTION_VALUE;
+            float coinRectHeight = coin.GetHeight() - AABB_COLLECTION_VALUE;
+
+            coinRect.Set(coinRectX, coinRectY, coinRectWidth, coinRectHeight);
 
             if(playerRect.Overlaps(coinRect))
             {

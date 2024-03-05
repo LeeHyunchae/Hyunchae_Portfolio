@@ -143,6 +143,17 @@ public class CoinController
 
         int coinGrade = Random.Range(0, (int)ECoinType.END);
 
+        float remainder = size % 2;
+
+        float floorHalfSize = (size - remainder) * 0.5f;
+
+        float coinStartposX = -floorHalfSize;
+
+        if (remainder != 0)
+        {
+            coinStartposX -= 0.5f;
+        }
+
         for (int i = 0; i <= size; i++)
         {
             Coin coin;
@@ -154,14 +165,8 @@ public class CoinController
 
             Vector2 coinPos = floor.GetTransform.position;
 
-            //.. TODO :: ??? ?? 
-            float result = -(size * 0.5f) + i;
-            coinPos.x = (result < 0) ? (int)(result) : (int)(result + 0.5f);
+            coinPos.x = coinStartposX + i;
 
-            if(size % 2 != 0)
-            {
-                coinPos.x -= 0.5f;
-            }
             coinPos.y = (floor.GetFloorHeight() * 0.5f) + (coin.GetHeight() * 0.5f);
 
             coin.GetTransform.SetParent(floor.GetTransform);
@@ -184,6 +189,17 @@ public class CoinController
 
         int obstaclesCount = _obstacles.Count -1;
 
+        float remainder = size % 2;
+
+        float floorHalfSize = (size - remainder) * 0.5f;
+
+        float coinStartposX = -floorHalfSize;
+
+        if (remainder != 0)
+        {
+            coinStartposX -= 0.5f;
+        }
+
         for (int i = 0; i <= size; i++)
         {
             Vector2 obstaclePos = _obstacles[obstacleIdx].GetTransform.localPosition;
@@ -198,15 +214,7 @@ public class CoinController
 
             Vector2 coinPos = floor.GetTransform.position;
 
-            float result = -(size * 0.5f) + i;
-
-            //.. TODO :: ???? int casting ??
-            coinPos.x = (result < 0) ? (int)(result) : (int)(result + 0.5f);
-
-            if (size % 2 != 0)
-            {
-                coinPos.x -= coin.GetWidth() * 0.5f;
-            }
+            coinPos.x = coinStartposX + i;
 
             coinPos.y = (floor.GetFloorHeight() * 0.5f) + (coin.GetHeight() * 0.5f);
 
@@ -238,14 +246,17 @@ public class CoinController
 
         int coinGrade = Random.Range(0, (int)ECoinType.END);
 
-        Vector2 coinPos = _floor.GetTransform.position;
+        Vector2 coinStartPos = _floor.GetTransform.position;
 
-        //.. TODO :: ?? ??
-        coinPos.x = coinPos.x - _floor.GetFloorWidth() * 0.5f - _floor.GetPrevFloorDistance * 0.5f - (squareSize * 0.5f);
-        coinPos.x -= coins[0].GetWidth() * 0.5f;
-        coinPos.y = _floor.GetPrevFloorPos.y + squareSize + MIN_FLOOR_INTERVAL;
+        float floorWidthHalf = _floor.GetFloorWidth() * 0.5f;
+        float prevFloorDistanceHalf = _floor.GetPrevFloorDistance * 0.5f;
+        float squareSizeHalf = squareSize * 0.5f;
+        float coinWidthHalf = coins[0].GetWidth() * 0.5f;
 
-        float startPosY = coinPos.y;
+        coinStartPos.x = coinStartPos.x - floorWidthHalf - prevFloorDistanceHalf - squareSizeHalf - coinWidthHalf;
+        coinStartPos.y = _floor.GetPrevFloorPos.y + squareSize + MIN_FLOOR_INTERVAL;
+
+        float squareStartPosY = coinStartPos.y;
 
         for (int i = 0; i < squareSize * squareSize; i++)
         {
@@ -258,13 +269,13 @@ public class CoinController
 
             if (i % squareSize == 0)
             {
-                coinPos.x += coin.GetWidth();
+                coinStartPos.x += coin.GetWidth();
             }
 
-            coinPos.y = startPosY - (coin.GetHeight() * (i % squareSize));
+            coinStartPos.y = squareStartPosY - (coin.GetHeight() * (i % squareSize));
 
             coin.GetTransform.SetParent(floor.GetTransform);
-            coin.GetTransform.position = coinPos;
+            coin.GetTransform.position = coinStartPos;
 
             coin.SetActive(true);
         }

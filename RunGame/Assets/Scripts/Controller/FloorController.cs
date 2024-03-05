@@ -14,6 +14,8 @@ public class FloorController
     private const int FIRSTFLOORSIZE = 20;
     private const int MIN_FLOOR_HEIGHT = -4;
     private const int MAX_FLOOR_HEIGHT = 4;
+    private const int MIN_FLOOR_SIZE = 1;
+    private const int MAX_FLOOR_SIZE = 15;
 
     private Floor[] floors;
     private int floorCount;
@@ -54,25 +56,26 @@ public class FloorController
     }
     private void InitFloorPos()
     {
-        for (int i = 0; i < floorCount; i++)
-        {
-            int floorIdx = i;
+        Vector2 floorPos = floors[0].GetTransform.position;
+        floorPos.x = 0;
+        floorPos.y = -1;
+        floors[0].GetTransform.position = floorPos;
+        floors[0].SetMiddleSize(FIRSTFLOORSIZE);
 
-            //.. TODO :: first / reposition 통합 -> for loop 1부터 시작 -> 시작값 세팅 for loop 위로
-            if (floorIdx == 0)
-            {
-                SetFirstFloor(floorIdx);
-            }
-            else
-            {
-                RepositionFloor(floorIdx);
-            }
+        if (OnChaneCurFloor != null)
+        {
+            OnChaneCurFloor(floors[frontFloorIdx]);
+        }
+
+        for (int i = 1; i < floorCount; i++)
+        {
+            RepositionFloor(i);
         }
     }
 
     private void CreateFloor()
     {
-        floorParent = new GameObject("Floos").transform;
+        floorParent = new GameObject("Floors").transform;
 
         floorParent.transform.position = Vector2.zero;
 
@@ -127,7 +130,7 @@ public class FloorController
 
     private void RepositionFloor(int _index)
     {
-        floors[_index].SetMiddleSize(Random.Range(1, 15));
+        floors[_index].SetMiddleSize(Random.Range(MIN_FLOOR_SIZE, MAX_FLOOR_SIZE));
 
         Vector2 floorPos = floors[_index].GetTransform.position;
 
@@ -146,18 +149,6 @@ public class FloorController
         {
             OnRepositionFloor.Invoke(floors[_index]);
         }
-    }
-
-    private void SetFirstFloor(int _idx)
-    {
-        floors[_idx].GetTransform.position = new Vector2(0, -1);
-        floors[_idx].SetMiddleSize(FIRSTFLOORSIZE);
-
-        if (OnChaneCurFloor != null)
-        {
-            OnChaneCurFloor(floors[frontFloorIdx]);
-        }
-
     }
 
     private bool CheckFrontFloor(int _idx)

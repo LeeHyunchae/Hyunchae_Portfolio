@@ -18,10 +18,4 @@ public class FixedObstacle : BaseObstacle
         boundsX = obstacleSprite.bounds.size.x;
         boundsY = obstacleSprite.bounds.size.y;
     }
-
-    //.. TODO :: 바디 구성한 이유가?
-    public override void Action()
-    {
-        return;
-    }
 }

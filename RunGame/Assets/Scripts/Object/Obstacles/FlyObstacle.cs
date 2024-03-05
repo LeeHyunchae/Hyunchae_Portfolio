@@ -10,6 +10,9 @@ public class FlyObstacle : BaseObstacle
         base.Init(_obstacleObj);
         obstacleType = EObstacleType.FLY;
         curSpeedRate = obstacleSpeedRate;
+
+        boundsX = obstacleSprite.bounds.size.x;
+        boundsY = obstacleSprite.bounds.size.y;
     }
 
     public override void Action()

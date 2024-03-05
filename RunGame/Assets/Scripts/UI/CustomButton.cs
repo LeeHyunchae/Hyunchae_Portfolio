@@ -41,7 +41,6 @@ public class CustomButton : MonoBehaviour, IPointerDownHandler , IPointerUpHandl
     {
         if(isPointerDown)
         {
-            //.. TODO :: 누른시간 대비 높이가 달라지는게 아니라면 누르고 있는 시간으로 체크해야 함 [jump / longjump 분기]
             OnPointerDownEvent?.Invoke();
         }
     }

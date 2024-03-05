@@ -36,9 +36,6 @@ public class BaseObstacle
     {
         obstacleSprite = _obstacleObj.GetComponentInChildren<SpriteRenderer>();
         _transform = _obstacleObj.GetComponent<Transform>();
-
-        boundsX = obstacleSprite.bounds.size.x;
-        boundsY = obstacleSprite.bounds.size.y;
     }
 
     public virtual void ResetData() { }

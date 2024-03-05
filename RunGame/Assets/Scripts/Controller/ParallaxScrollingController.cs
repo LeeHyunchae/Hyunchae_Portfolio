@@ -20,6 +20,7 @@ public class ParallaxScrollingController : MonoBehaviour
     private float maxPosX;
     private float standardY;
 
+    private Vector2 objectLocalPos;
 
     private void Awake()
     {
@@ -39,6 +40,7 @@ public class ParallaxScrollingController : MonoBehaviour
             standardY = transform.position.y;
         }
 
+        objectLocalPos = transform.position;
     }
 
     private void Update()
