@@ -8,9 +8,11 @@ public class InGameSceneController : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI scoreText;
     [SerializeField] CustomButton jumpBtn;
+    [SerializeField] Image[] heartArray;
 
     private const string SCORE = "Score : ";
-    private int playerScore = 0;
+    private const float SPEED_TO_SCORE_MAGNIFICATION = 0.2f;
+    private float playerScore = 0;
 
     private PlayerController playerCtrl;
     private FloorController floorCtrl;
@@ -49,6 +51,8 @@ public class InGameSceneController : MonoBehaviour
         playerCtrl = new PlayerController();
         playerCtrl.Init();
         playerCtrl.OnGetCoin = OnPlayerGetCoin;
+        playerCtrl.OnIncreaseHP = OnIncreaseHP;
+        playerCtrl.OnDecreaseHP = OnDecreaseHP;
     }
 
     private void InitFloorCtrl()
@@ -105,6 +109,9 @@ public class InGameSceneController : MonoBehaviour
             return;
         }
 
+        playerScore += curGameSpeed * SPEED_TO_SCORE_MAGNIFICATION * Time.deltaTime;
+        scoreText.text = SCORE + (int)playerScore;
+
         playerCtrl.Update();
         floorCtrl.Update();
         obstacleCtrl.Update();
@@ -157,4 +164,25 @@ public class InGameSceneController : MonoBehaviour
         scoreText.text = SCORE + playerScore;
     }
 
+    private void OnIncreaseHP(int _hp)
+    {
+        if(_hp >= heartArray.Length)
+        {
+            return;
+        }
+
+        int idx = _hp - 1;
+        heartArray[idx].enabled = true;
+    }
+
+    private void OnDecreaseHP(int _hp)
+    {
+        if(_hp < 0)
+        {
+            //게임 종료
+            return;
+        }
+
+        heartArray[_hp].enabled = false;
+    }
 }

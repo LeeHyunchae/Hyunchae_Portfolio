@@ -18,6 +18,7 @@ public class PlayerController
     private const float GRAVITY = 0.45f;
     private const float LONGJUMPPOWER = 0.125f;
     private const float SHORTJUMPPOWER = 0.225f;
+    private const float HIT_IGNORE_TIME = 3;
     private const int PLAYERSIZE = 1;
     private const float PLAYERHALFSIZE = 0.5f;
     private const string PLAYERPATH = "Prefabs/Player";
@@ -25,9 +26,11 @@ public class PlayerController
 
     private bool isGrounded;
     private bool isDoubleJump;
+    private bool isHit;
 
     private float curShortJumpPower = 0;
     private float curLongJumpPower = 0;
+    private float curHitIgnoreTime = 0;
 
     private PlayerState state;
 
@@ -37,8 +40,11 @@ public class PlayerController
     private BaseObstacle[] obstacles;
     private Coin[] coins;
     private Vector2 playerPos;
+    private int playerHP = 10;
 
     public Action<ECoinType> OnGetCoin;
+    public Action<int> OnIncreaseHP;
+    public Action<int> OnDecreaseHP;
 
     public float GetPlayerHalfSize => PLAYERHALFSIZE;
 
@@ -80,8 +86,21 @@ public class PlayerController
         playerTM.position = playerPos;
 
         CheckGroundAABB();
-        CheckObstacleAABB();
         CheckCoinAABB();
+
+        if(isHit)
+        {
+            curHitIgnoreTime += Time.deltaTime;
+            if(curHitIgnoreTime >= HIT_IGNORE_TIME)
+            {
+                curHitIgnoreTime = 0;
+                isHit = false;
+            }
+        }
+        else
+        {
+            CheckObstacleAABB();
+        }
 
         if (isGrounded && state != PlayerState.WALK)
         {
@@ -188,6 +207,8 @@ public class PlayerController
         Rect playerRect = new Rect(playerPos.x - PLAYERHALFSIZE, playerPos.y - PLAYERHALFSIZE + AABB_COLLECTION_VALUE, PLAYERSIZE, AABB_COLLECTION_VALUE);
         Rect floorRect = new Rect(floorPos.x - floorWidthHalf, floorPos.y + floorHeightHalf, curFloor.GetFloorWidth(), AABB_COLLECTION_VALUE);
 
+        //RectExtention.DrawDebugLine(floorRect);
+
         isGrounded = playerRect.Overlaps(floorRect);
 
     }
@@ -224,7 +245,10 @@ public class PlayerController
 
             if (playerRect.Overlaps(obstacleRect))
             {
-                Debug.Log("장애물 충돌!");
+                isHit = true;
+                playerHP--;
+                OnDecreaseHP.Invoke(playerHP);
+                return;
             }
         }
 
