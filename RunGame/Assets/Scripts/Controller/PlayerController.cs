@@ -207,7 +207,7 @@ public class PlayerController
         Rect playerRect = new Rect(playerPos.x - PLAYERHALFSIZE, playerPos.y - PLAYERHALFSIZE + AABB_COLLECTION_VALUE, PLAYERSIZE, AABB_COLLECTION_VALUE);
         Rect floorRect = new Rect(floorPos.x - floorWidthHalf, floorPos.y + floorHeightHalf, curFloor.GetFloorWidth(), AABB_COLLECTION_VALUE);
 
-        //RectExtention.DrawDebugLine(floorRect);
+        floorRect.DrawDebugLine();
 
         isGrounded = playerRect.Overlaps(floorRect);
 

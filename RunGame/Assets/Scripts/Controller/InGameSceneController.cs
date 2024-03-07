@@ -11,7 +11,7 @@ public class InGameSceneController : MonoBehaviour
     [SerializeField] Image[] heartArray;
 
     private const string SCORE = "Score : ";
-    private const float SPEED_TO_SCORE_MAGNIFICATION = 0.2f;
+    //private const float SPEED_TO_SCORE_MAGNIFICATION = 0.2f;
     private float playerScore = 0;
 
     private PlayerController playerCtrl;
@@ -109,8 +109,8 @@ public class InGameSceneController : MonoBehaviour
             return;
         }
 
-        playerScore += curGameSpeed * SPEED_TO_SCORE_MAGNIFICATION * Time.deltaTime;
-        scoreText.text = SCORE + (int)playerScore;
+        //playerScore += curGameSpeed * SPEED_TO_SCORE_MAGNIFICATION * Time.deltaTime;
+        //scoreText.text = SCORE + (int)playerScore;
 
         playerCtrl.Update();
         floorCtrl.Update();
