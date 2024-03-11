@@ -39,6 +39,7 @@ public class PlayerController
     private float floorLandPosY;
     private BaseObstacle[] obstacles;
     private Coin[] coins;
+    private BaseItem[] items;
     private Vector2 playerPos;
     private int playerHP = 10;
 
@@ -87,6 +88,7 @@ public class PlayerController
 
         CheckGroundAABB();
         CheckCoinAABB();
+        CheckItemAABB();
 
         if(isHit)
         {
@@ -181,6 +183,11 @@ public class PlayerController
     public void SetCoins(Coin[] _coins)
     {
         coins = _coins;
+    }
+
+    public void SetItems(BaseItem[] _items)
+    {
+        items = _items;
     }
 
     private void CheckGroundAABB()
@@ -297,7 +304,52 @@ public class PlayerController
                 OnGetCoin.Invoke(coin.GetCoinType);
             }
         }
+    }
+
+    private void CheckItemAABB()
+    {
+        if (items == null)
+        {
+            return;
+        }
+
+        int count = items.Length;
+
+        BaseItem item;
+
+        Vector2 playerPos = playerTM.position;
+        Rect playerRect = new Rect(playerPos.x - PLAYERHALFSIZE, playerPos.y + PLAYERHALFSIZE, PLAYERSIZE, PLAYERSIZE);
+        Rect itemRect = new Rect();
+
+        for (int i = 0; i < count; i++)
+        {
+            item = items[i];
+
+            if (!item.GetActive || !item.GetIsInScreen)
+            {
+                continue;
+            }
 
 
+            Vector2 itemPos = item.GetTransform.position;
+
+            float itemWidthHalf = item.GetWidth() * 0.5f;
+            float itemHeightHalf = item.GetHeight() * 0.5f;
+
+            float itemRectX = itemPos.x - itemWidthHalf;
+            float itemRectY = itemPos.y + itemHeightHalf;
+            float itemRectWidth = item.GetWidth();
+            float itemRectHeight = item.GetHeight();
+
+            itemRect.Set(itemRectX, itemRectY, itemRectWidth, itemRectHeight);
+
+            itemRect.DrawDebugLine();
+
+            if (playerRect.Overlaps(itemRect))
+            {
+                item.SetActive(false);
+                //Todo 아이템 먹기
+            }
+        }
     }
 }

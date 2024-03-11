@@ -14,6 +14,7 @@ public class BaseObstacle
 {
     protected SpriteRenderer obstacleSprite = new SpriteRenderer();
     protected Transform _transform;
+    protected Transform parentTm;
     protected EObstacleType obstacleType;
     protected float obstacleSpeedRate = 8;
     protected bool isInScreen = false;
@@ -23,8 +24,8 @@ public class BaseObstacle
     public bool GetIsInScreen => isInScreen;
     public EObstacleType GetObstacleType => obstacleType;
 
-    public void SetActive(bool _active) => obstacleSprite.enabled = _active;
     public void SetIsInScreen(bool _isInScrenn) => isInScreen = _isInScrenn;
+    public void SetParentTm(Transform _parent) => parentTm = _parent;
 
     protected float boundsX;
     protected float boundsY;
@@ -68,6 +69,16 @@ public class BaseObstacle
     public virtual Vector2 GetPosition()
     {
         return _transform.position;
+    }
+
+    public void SetActive(bool _active)
+    {
+        obstacleSprite.enabled = _active;
+
+        if(!_active)
+        {
+            _transform.SetParent(parentTm);
+        }
     }
 
 }

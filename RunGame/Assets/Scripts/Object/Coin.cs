@@ -17,20 +17,21 @@ public class Coin
     private const string COINGRADE = "CoinGrade";
 
     private Transform _transform;
+    private Transform parentTm;
     private ECoinType coinType;
 
     public Transform GetTransform => _transform;
     public bool GetActive => sprite.enabled;
-    public bool GetIsInScreen => isInScrenn;
+    public bool GetIsInScreen => isInScreen;
     public ECoinType GetCoinType => coinType;
 
-    public void SetActive(bool _active) => sprite.enabled = _active;
-    public void SetIsInScreen(bool _isInScreen) => isInScrenn = _isInScreen;
+    public void SetIsInScreen(bool _isInScreen) => isInScreen = _isInScreen;
+    public void SetParentTm(Transform _parent) => parentTm = _parent;
 
     private float boundsX;
     private float boundsY;
 
-    private bool isInScrenn;
+    private bool isInScreen;
 
     public virtual void Init(GameObject _coinObj)
     {
@@ -58,6 +59,16 @@ public class Coin
     {
         coinType = (ECoinType)_grade;
         coinAnim.SetInteger(COINGRADE, (int)coinType);
+    }
+
+    public void SetActive(bool _active)
+    {
+        sprite.enabled = _active;
+
+        if(!_active)
+        {
+            _transform.SetParent(parentTm);
+        }
     }
 
 }

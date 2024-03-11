@@ -60,6 +60,9 @@ public class ObstacleController
             obstacle.SetActive(false);
 
             obstacles[i] = obstacle;
+
+            obstacle.SetParentTm(obstacleParent);
+            obstacle.GetTransform.SetParent(obstacleParent);
         }
 
         obstacleCount += _obstacles.Length;
@@ -198,8 +201,6 @@ public class ObstacleController
 
             if (CheckOutsideObstacle(obstacle))
             {
-                obstacle.GetTransform.SetParent(obstacleParent);
-
                 obstacle.SetActive(false);
                 obstacle.SetIsInScreen(false);
 

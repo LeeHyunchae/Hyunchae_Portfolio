@@ -13,6 +13,7 @@ public class CoinController
     private const int COIN_CAPACITY = 400;
 
     private Coin[] coins;
+    private List<Coin> repositionCoins = new List<Coin>();
 
     private float screenLeft;
     private float screenRight;
@@ -38,6 +39,10 @@ public class CoinController
             coin.SetActive(false);
 
             coins[i] = coin;
+
+            coin.SetParentTm(coinParent);
+
+            coin.GetTransform.SetParent(coinParent);
         }
     }
 
@@ -95,8 +100,6 @@ public class CoinController
 
             if (CheckOutsideCoin(coin))
             {
-                coin.GetTransform.SetParent(coinParent);
-
                 coin.SetActive(false);
                 coin.SetIsInScreen(false);
             }
@@ -112,8 +115,10 @@ public class CoinController
         return _coin.GetTransform.position.x + _coin.GetWidth() * 0.5f <= screenLeft;
     }
 
-    public void OnRepositionFloor(Floor _rePosFloor, List<BaseObstacle> _obstacles)
+    public List<Coin> OnRepositionFloor(Floor _rePosFloor, List<BaseObstacle> _obstacles)
     {
+        repositionCoins.Clear();
+
         if (_rePosFloor.GetPrevFloorDistance > MIN_FLOOR_INTERVAL)
         {
             bool isSquarePattern = Random.value > 0.5f;
@@ -132,6 +137,8 @@ public class CoinController
         {
             SetPosObstaclePattern(_rePosFloor, _obstacles);
         }
+
+        return repositionCoins;
     }
 
     #region Patterns
@@ -173,6 +180,8 @@ public class CoinController
             coin.GetTransform.localPosition = coinPos;
 
             coin.SetActive(true);
+
+            repositionCoins.Add(coin);
         }
 
     }
@@ -234,6 +243,8 @@ public class CoinController
             coin.GetTransform.localPosition = coinPos;
 
             coin.SetActive(true);
+
+            repositionCoins.Add(coin);
         }
 
     }
@@ -278,6 +289,7 @@ public class CoinController
             coin.GetTransform.position = coinStartPos;
 
             coin.SetActive(true);
+
         }
 
     }

@@ -14,10 +14,13 @@ public class InGameSceneController : MonoBehaviour
     //private const float SPEED_TO_SCORE_MAGNIFICATION = 0.2f;
     private float playerScore = 0;
 
+    private ItemManager itemManager;
+    private ScoreManager scoreManager;
     private PlayerController playerCtrl;
     private FloorController floorCtrl;
     private ObstacleController obstacleCtrl;
     private CoinController coinCtrl;
+    private ItemController itemCtrl;
     private int curGameSpeed = 5;
     private float flyObstacleInterval = 3f;
     private Camera mainCam;
@@ -34,16 +37,22 @@ public class InGameSceneController : MonoBehaviour
         screenLeft = mainCam.ScreenToWorldPoint(new Vector3(0, 0, 0)).x;
         screenRight = mainCam.ScreenToWorldPoint(new Vector3(Screen.width, 0, 0)).x;
 
+        itemManager = ItemManager.getInstance;
+        itemManager.Initialize();
+        scoreManager = ScoreManager.getInstance;
+        scoreManager.Initialize();
+
         InitPlayerCtrl();
         InitObstacleCtrl();
         InitCoinCtrl();
+        InitItemCtrl();
         InitFloorCtrl();
         InitJumpBtn();
 
         SetSpeedRate();
         SetObstacles();
         SetCoins();
-
+        SetItems();
     }
 
     private void InitPlayerCtrl()
@@ -79,6 +88,14 @@ public class InGameSceneController : MonoBehaviour
         coinCtrl.SetScreenLeftRight(screenLeft, screenRight);
         coinCtrl.Init();
     }
+
+    private void InitItemCtrl()
+    {
+        itemCtrl = new ItemController();
+        itemCtrl.SetScreenLeftRight(screenLeft, screenRight);
+        itemCtrl.Init();
+    }
+
     private void InitJumpBtn()
     {
         jumpBtn.OnPointerClickEvent = playerCtrl.Jump;
@@ -116,6 +133,7 @@ public class InGameSceneController : MonoBehaviour
         floorCtrl.Update();
         obstacleCtrl.Update();
         coinCtrl.Update();
+        itemCtrl.Update();
 
         //시간 경과에 따라 || 플레이어 피격 상황
         if(Input.GetKeyDown(KeyCode.RightArrow))
@@ -151,10 +169,16 @@ public class InGameSceneController : MonoBehaviour
         playerCtrl.SetCoins(coinCtrl.GetCoins);
     }
 
+    private void SetItems()
+    {
+        playerCtrl.SetItems(itemCtrl.GetItems);
+    }
+
     private void OnRepositionFloor(Floor _floor)
     {
         List<BaseObstacle> obstacles = obstacleCtrl.OnRepositionFloor(_floor);
-        coinCtrl.OnRepositionFloor(_floor,obstacles);
+        List<Coin> coins = coinCtrl.OnRepositionFloor(_floor,obstacles);
+        itemCtrl.OnRepositionFloor(_floor, coins);
     }
 
     private void OnPlayerGetCoin(ECoinType _coinType)
@@ -180,6 +204,8 @@ public class InGameSceneController : MonoBehaviour
         if(_hp < 0)
         {
             //게임 종료
+
+            scoreManager.SetScore((int)playerScore);
             return;
         }
 
