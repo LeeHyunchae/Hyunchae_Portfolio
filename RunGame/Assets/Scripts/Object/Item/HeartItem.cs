@@ -10,4 +10,11 @@ public class HeartItem : BaseItem
 
         itemType = EItemType.DINO;
     }
+
+    public override void OnGetItem(PlayerController _player)
+    {
+        base.OnGetItem(_player);
+
+        _player.IncreasePlayerHP();
+    }
 }

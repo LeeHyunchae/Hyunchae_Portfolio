@@ -10,7 +10,7 @@ public enum EItemType
     END = 3
 }
 
-public class BaseItem : MonoBehaviour
+public class BaseItem
 {
     protected SpriteRenderer sprite;
 
@@ -50,7 +50,7 @@ public class BaseItem : MonoBehaviour
         return boundsY;
     }
 
-    public virtual void OnItem(PlayerController _player) { }
+    public virtual void OnGetItem(PlayerController _player) { }
 
     public void SetActive(bool _active)
     {

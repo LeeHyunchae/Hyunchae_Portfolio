@@ -3,18 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum PlayerState
-{
-    IDLE = 0,
-    WALK = 1,
-    JUMPUP = 2,
-    JUMPDOWN = 3
-}
-
 public class PlayerController
 {
-    private Animator anim;
-    private const string PLAYERSTATE = "PlayerState";
+    private Player player;
     private const float GRAVITY = 0.45f;
     private const float LONGJUMPPOWER = 0.125f;
     private const float SHORTJUMPPOWER = 0.225f;
@@ -23,25 +14,25 @@ public class PlayerController
     private const float PLAYERHALFSIZE = 0.5f;
     private const string PLAYERPATH = "Prefabs/Player";
     private const float AABB_COLLECTION_VALUE = 0.25f;
+    private const int PLAYER_MAX_HP = 10;
 
     private bool isGrounded;
     private bool isDoubleJump;
     private bool isHit;
+    private bool isMagnet;
 
     private float curShortJumpPower = 0;
     private float curLongJumpPower = 0;
     private float curHitIgnoreTime = 0;
+    private float curMagnetTime = 0;
 
-    private PlayerState state;
-
-    private Transform playerTM;
     private Floor curFloor;
     private float floorLandPosY;
     private BaseObstacle[] obstacles;
     private Coin[] coins;
     private BaseItem[] items;
     private Vector2 playerPos;
-    private int playerHP = 10;
+    private int coinSpeed;
 
     public Action<ECoinType> OnGetCoin;
     public Action<int> OnIncreaseHP;
@@ -56,13 +47,30 @@ public class PlayerController
     
     private void SetPlayer(GameObject _player)
     {
-        anim = _player.GetComponent<Animator>();
-        state = PlayerState.IDLE;
+        player = new Player();
+        player.Init(_player);
+        player.SetHP(PLAYER_MAX_HP);
+        playerPos = player.GetTranstorm.position;
 
-        playerTM = _player.GetComponent<Transform>();
-        playerPos = playerTM.position;
+    }
+    public void IncreasePlayerHP()
+    {
+        int playerHP = player.GetHP;
+        player.SetHP(playerHP++);
+        OnIncreaseHP?.Invoke(player.GetHP);
     }
 
+    public void DecreasePlayerHP()
+    {
+        int playerHP = player.GetHP;
+        player.SetHP(--playerHP);
+        OnDecreaseHP?.Invoke(player.GetHP);
+    }
+
+    public void SetCoinSpeed(int _speed)
+    {
+        coinSpeed = _speed;
+    }
     public void Update()
     {
         if (Input.GetKeyDown(KeyCode.UpArrow))
@@ -73,6 +81,19 @@ public class PlayerController
         {
             LongJump();
         }
+
+
+        if (isMagnet)
+        {
+            curMagnetTime += Time.deltaTime;
+
+            if (curMagnetTime > ItemManager.getInstance.GetMagnetDuration)
+            {
+                curMagnetTime = 0;
+                isMagnet = false;
+            }
+        }
+
     }
 
     public void FixedUpdate()
@@ -84,7 +105,7 @@ public class PlayerController
 
         playerPos.y += curShortJumpPower + curLongJumpPower;
 
-        playerTM.position = playerPos;
+        player.SetPosition(playerPos);
 
         CheckGroundAABB();
         CheckCoinAABB();
@@ -104,7 +125,7 @@ public class PlayerController
             CheckObstacleAABB();
         }
 
-        if (isGrounded && state != PlayerState.WALK)
+        if (isGrounded && player.GetPlayerState != EPlayerState.WALK)
         {
             Land();
         }
@@ -114,9 +135,9 @@ public class PlayerController
     {
         curShortJumpPower -= GRAVITY * Time.deltaTime;
 
-        if (curShortJumpPower < 0 && state != PlayerState.JUMPDOWN)
+        if (curShortJumpPower < 0 && player.GetPlayerState != EPlayerState.JUMPDOWN)
         {
-            ChangeState(PlayerState.JUMPDOWN);
+            ChangeState(EPlayerState.JUMPDOWN);
         }
     }
 
@@ -125,20 +146,20 @@ public class PlayerController
         if (isGrounded)
         {
             curShortJumpPower = SHORTJUMPPOWER;
-            ChangeState(PlayerState.JUMPUP);
+            ChangeState(EPlayerState.JUMPUP);
             return;
         }
         else if(!isDoubleJump)
         {
             isDoubleJump = true;
             curShortJumpPower = SHORTJUMPPOWER;
-            ChangeState(PlayerState.JUMPUP);
+            ChangeState(EPlayerState.JUMPUP);
         }
     }
 
     public void LongJump()
     {
-        if(state != PlayerState.JUMPDOWN)
+        if(player.GetPlayerState != EPlayerState.JUMPDOWN)
         {
             curLongJumpPower = Mathf.Lerp(curLongJumpPower, LONGJUMPPOWER, 0.01f);
         }
@@ -151,22 +172,21 @@ public class PlayerController
         curLongJumpPower = 0;
         isDoubleJump = false;
 
-        ChangeState(PlayerState.WALK);
+        ChangeState(EPlayerState.WALK);
 
-        playerPos = playerTM.position;
         playerPos.y = floorLandPosY;
-        playerTM.position = playerPos;
+        player.SetPosition(playerPos);
     }
 
-    private void ChangeState(PlayerState _state)
+    private void ChangeState(EPlayerState _state)
     {
-        state = _state;
-        PlayCurStateAnim(state);
+        player.SetState(_state);
+        PlayCurStateAnim(_state);
     }
 
-    private void PlayCurStateAnim(PlayerState _state)
+    private void PlayCurStateAnim(EPlayerState _state)
     {
-        anim.SetInteger(PLAYERSTATE, (int)_state);
+        player.ChangeAnimation((int)_state);
     }
 
     public void SetCurFloor(Floor _floor)
@@ -190,6 +210,11 @@ public class PlayerController
         items = _items;
     }
 
+    public void OnGetMagnet()
+    {
+        isMagnet = true;
+    }
+
     private void CheckGroundAABB()
     {
         if(curShortJumpPower > 0 || curFloor == null)
@@ -197,8 +222,6 @@ public class PlayerController
             isGrounded = false;
             return;
         }
-
-        Vector2 playerPos = playerTM.position;
 
         if(playerPos.y == floorLandPosY)
         {
@@ -231,7 +254,6 @@ public class PlayerController
 
         BaseObstacle obstacle;
 
-        Vector2 playerPos = playerTM.position;
         Rect playerRect = new Rect(playerPos.x - PLAYERHALFSIZE, playerPos.y + PLAYERHALFSIZE, PLAYERSIZE, PLAYERSIZE);
         Rect obstacleRect = new Rect();
 
@@ -250,11 +272,12 @@ public class PlayerController
 
             obstacleRect.Set(obstaclePos.x - obstacleWidthHalf , obstaclePos.y + obstacleHeightHalf, obstacle.GetWidth(), obstacle.GetHeight());
 
+            obstacleRect.DrawDebugLine();
+
             if (playerRect.Overlaps(obstacleRect))
             {
                 isHit = true;
-                playerHP--;
-                OnDecreaseHP.Invoke(playerHP);
+                DecreasePlayerHP();
                 return;
             }
         }
@@ -273,7 +296,6 @@ public class PlayerController
 
         Coin coin;
 
-        Vector2 playerPos = playerTM.position;
         Rect playerRect = new Rect(playerPos.x - PLAYERHALFSIZE, playerPos.y + PLAYERHALFSIZE, PLAYERSIZE, PLAYERSIZE);
         Rect coinRect = new Rect();
 
@@ -287,16 +309,30 @@ public class PlayerController
             }
 
             Vector2 coinPos = coin.GetTransform.position;
+            if (isMagnet)
+            {
+                float distance = Vector2.Distance(coinPos, playerPos);
+
+                if(distance <= ItemManager.getInstance.GetMagnetRange)
+                {
+                    Vector2 direction = (playerPos - coinPos).normalized;
+
+                    coinPos += direction * coinSpeed * Time.deltaTime;
+                    coin.GetTransform.position = coinPos;
+                }
+            }
 
             float coinWidthHalf = coin.GetWidth() * 0.5f;
             float coinHeightHalf = coin.GetHeight() * 0.5f;
 
-            float coinRectX = coinPos.x - coinWidthHalf + AABB_COLLECTION_VALUE * 2;
-            float coinRectY = coinPos.y + coinHeightHalf - AABB_COLLECTION_VALUE * 2;
-            float coinRectWidth = coin.GetWidth() - AABB_COLLECTION_VALUE;
-            float coinRectHeight = coin.GetHeight() - AABB_COLLECTION_VALUE;
+            float coinRectX = coinPos.x - coinWidthHalf + AABB_COLLECTION_VALUE;
+            float coinRectY = coinPos.y + coinHeightHalf - AABB_COLLECTION_VALUE;
+            float coinRectWidth = coin.GetWidth() - AABB_COLLECTION_VALUE * 2;
+            float coinRectHeight = coin.GetHeight() - AABB_COLLECTION_VALUE * 2;
 
             coinRect.Set(coinRectX, coinRectY, coinRectWidth, coinRectHeight);
+
+            coinRect.DrawDebugLine();
 
             if(playerRect.Overlaps(coinRect))
             {
@@ -317,7 +353,6 @@ public class PlayerController
 
         BaseItem item;
 
-        Vector2 playerPos = playerTM.position;
         Rect playerRect = new Rect(playerPos.x - PLAYERHALFSIZE, playerPos.y + PLAYERHALFSIZE, PLAYERSIZE, PLAYERSIZE);
         Rect itemRect = new Rect();
 
@@ -330,8 +365,7 @@ public class PlayerController
                 continue;
             }
 
-
-            Vector2 itemPos = item.GetTransform.position;
+             Vector2 itemPos = item.GetTransform.position;
 
             float itemWidthHalf = item.GetWidth() * 0.5f;
             float itemHeightHalf = item.GetHeight() * 0.5f;
@@ -348,7 +382,7 @@ public class PlayerController
             if (playerRect.Overlaps(itemRect))
             {
                 item.SetActive(false);
-                //Todo 아이템 먹기
+                item.OnGetItem(this);
             }
         }
     }

@@ -36,12 +36,12 @@ public class ItemController
         CreateItems();
 
         itemManager = ItemManager.getInstance;
-        itemDropInterval = itemManager.GetItemDropInterval;
-        Debug.Log(itemDropInterval);
+        //itemDropInterval = itemManager.GetItemDropInterval;
+        itemDropInterval = 10;
     }
     #region Init && CreateObstacleGameObject
 
-    private void InitObstacles<T>(GameObject[] _itemObjs) where T : BaseItem, new()
+    private void InitItems<T>(GameObject[] _itemObjs) where T : BaseItem, new()
     {
         int curArrayCount = _itemObjs.Length + itemCount;
 
@@ -56,6 +56,7 @@ public class ItemController
 
             item.SetParentTm(itemParent);
             item.GetTransform.SetParent(itemParent);
+
         }
 
         itemCount += _itemObjs.Length;
@@ -84,7 +85,7 @@ public class ItemController
             itemObjs[i] = GameObject.Instantiate<GameObject>(originItemObj, Vector2.zero, Quaternion.identity, itemParent);
         }
 
-        InitObstacles<HeartItem>(itemObjs);
+        InitItems<HeartItem>(itemObjs);
     }
 
     private void CreateDinoItem()
@@ -97,7 +98,7 @@ public class ItemController
             itemObjs[i] = GameObject.Instantiate<GameObject>(originItemObj, Vector2.zero, Quaternion.identity, itemParent);
         }
 
-        InitObstacles<DinoItem>(itemObjs);
+        InitItems<DinoItem>(itemObjs);
     }
 
     private void CreateMagnetItem()
@@ -110,7 +111,7 @@ public class ItemController
             itemObjs[i] = GameObject.Instantiate<GameObject>(originItemObj, Vector2.zero, Quaternion.identity, itemParent);
         }
 
-        InitObstacles<MagnetItem>(itemObjs);
+        InitItems<MagnetItem>(itemObjs);
 
     }
 
@@ -131,7 +132,7 @@ public class ItemController
     private void CheckItemPos()
     {
 
-        for (int i = 0; i < (int)EItemType.END; i++)
+        for (int i = 0; i < itemCount; i++)
         {
             BaseItem item = items[i];
 
@@ -173,7 +174,8 @@ public class ItemController
 
         int halfPosCoin = (int)(_coins.Count * 0.5f);
 
-        int randomItem = Random.Range(0, (int)EItemType.END);
+        //int randomItem = Random.Range(0, (int)EItemType.END);
+        int randomItem = 2;
 
         BaseItem item;
 
@@ -213,7 +215,6 @@ public class ItemController
         if (curItemDropInterval > itemDropInterval)
         {
             curItemDropInterval = 0;
-            Debug.Log("템뿌립니다");
             isDropReady = true;
         }
     }

@@ -10,7 +10,7 @@ public class CoinController
     private const float MIN_OBSTACLE_INTERVAL = 0.6f;
     private const int MIN_FLOOR_INTERVAL = 4;
 
-    private const int COIN_CAPACITY = 400;
+    private const int COIN_CAPACITY = 500;
 
     private Coin[] coins;
     private List<Coin> repositionCoins = new List<Coin>();

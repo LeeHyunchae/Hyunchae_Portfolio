@@ -11,6 +11,7 @@ public class InGameSceneController : MonoBehaviour
     [SerializeField] Image[] heartArray;
 
     private const string SCORE = "Score : ";
+    private const int BASE_COIN_SPEED = 3;
     //private const float SPEED_TO_SCORE_MAGNIFICATION = 0.2f;
     private float playerScore = 0;
 
@@ -152,6 +153,7 @@ public class InGameSceneController : MonoBehaviour
     {
         floorCtrl.SetSpeedRate(curGameSpeed);
         obstacleCtrl.SetSpeedRate(curGameSpeed);
+        playerCtrl.SetCoinSpeed(curGameSpeed + BASE_COIN_SPEED);
     }
 
     private void ChangeCurFloor(Floor _curFloor)
