@@ -4,17 +4,9 @@ using UnityEngine;
 
 public class ItemManager : Singleton<ItemManager>
 {
-    private const float BASE_DINO_DURATION = 5;
-    private const int BASE_Heart_VALUE = 1;
-    private const float BASE_MAGNET_DURATION = 5;
-    private const int BASE_MAGNET_RANGE = 5;
-    private const float BASE_ITEM_DROP_INTERVAL = 10;
+    private ItemModel[] items;
 
-    private float curDinoDuration = 0;
-    private int curHeartValue = 0;
-    private float curMagnetDuration = 0;
-    private int curMagnetRange = 0;
-    private float curItemDropInterval = 0;
+    public ItemModel[] GetItems => items;
 
     // Todo 저장 및 불러오기 기능
 
@@ -22,34 +14,103 @@ public class ItemManager : Singleton<ItemManager>
     {
         base.Initialize();
 
+        items = new ItemModel[(int)EItemType.END];
+
         LoadItemStatus();
         return true;
     }
 
     private void LoadItemStatus()
     {
-        //Todo 불러오기로 cur 값들 세팅해야함
-        curDinoDuration = BASE_DINO_DURATION;
-        curHeartValue = BASE_Heart_VALUE;
-        curMagnetDuration = BASE_MAGNET_DURATION;
-        curMagnetRange = BASE_MAGNET_RANGE;
-        curItemDropInterval = BASE_ITEM_DROP_INTERVAL;
+        //Todo 불러오기로 세팅, 테이블 화
+
+        int count = (int)EItemType.END;
+
+        for(int i = 0; i<count; i++)
+        {
+            items[i] = new ItemModel();
+        }
+
+        int typeNum = (int)EItemType.HEART;
+
+        items[typeNum].itemType = (EItemType)typeNum;
+        items[typeNum].itemValueLevel = 0;
+        items[typeNum].itemDurationLevel = 0;
+        items[typeNum].baseItemValue = 1;
+        items[typeNum].itemValue_IncreaseValue = 1;
+        items[typeNum].valueLevelUp_CostInceaseValue = 500;
+        items[typeNum].baseitemDuration = 0;
+        items[typeNum].itemDuration_InceaseValue = 0;
+        items[typeNum].durationLevelUp_CostInceaseValue = 0;
+        items[typeNum].itemValueInfo = "체력 회복량 상승";
+        items[typeNum].itemDurationInfo = null;
+        items[typeNum].InitData();
+
+        typeNum = (int)EItemType.DINO;
+
+        items[typeNum].itemType = (EItemType)typeNum;
+        items[typeNum].itemValueLevel = 0;
+        items[typeNum].itemDurationLevel = 0;
+        items[typeNum].baseItemValue = 0;
+        items[typeNum].itemValue_IncreaseValue = 0;
+        items[typeNum].valueLevelUp_CostInceaseValue = 0;
+        items[typeNum].baseitemDuration = 5;
+        items[typeNum].itemDuration_InceaseValue = 0.5f;
+        items[typeNum].durationLevelUp_CostInceaseValue = 300;
+        items[typeNum].itemValueInfo = null;
+        items[typeNum].itemDurationInfo = "변신 지속시간 상승";
+        items[typeNum].InitData();
+
+        typeNum = (int)EItemType.MAGNET;
+
+        items[typeNum].itemType = (EItemType)typeNum;
+        items[typeNum].itemValueLevel = 0;
+        items[typeNum].itemDurationLevel = 0;
+        items[typeNum].baseItemValue = 5;
+        items[typeNum].baseitemDuration = 5;
+        items[typeNum].itemValue_IncreaseValue = 1;
+        items[typeNum].itemDuration_InceaseValue = 0.5f;
+        items[typeNum].valueLevelUp_CostInceaseValue = 500;
+        items[typeNum].durationLevelUp_CostInceaseValue = 300;
+        items[typeNum].itemValueInfo = "자석 범위 상승";
+        items[typeNum].itemDurationInfo = "자석 지속시간 상승";
+        items[typeNum].InitData();
+
+        typeNum = (int)EItemType.ITEM_DROP_INTERVAL;
+
+        items[typeNum].itemType = (EItemType)typeNum;
+        items[typeNum].itemValueLevel = 0;
+        items[typeNum].itemDurationLevel = 0;
+        items[typeNum].baseItemValue = 0;
+        items[typeNum].baseitemDuration = 15;
+        items[typeNum].itemValue_IncreaseValue = 0;
+        items[typeNum].itemDuration_InceaseValue = -0.5f;
+        items[typeNum].valueLevelUp_CostInceaseValue = 0;
+        items[typeNum].durationLevelUp_CostInceaseValue = 500;
+        items[typeNum].itemValueInfo = null;
+        items[typeNum].itemDurationInfo = "아이템 등장 시간 감소";
+        items[typeNum].InitData();
     }
 
-    public float GetDinoDuration => curDinoDuration;
-    public int GetHeartValue => curHeartValue;
-    public float GetMagnetDuration => curMagnetDuration;
-    public int GetMagnetRange => curMagnetRange;
-    public float GetItemDropInterval => curItemDropInterval;
-
-    public void SetDinoDuration(float _duration) => curDinoDuration = BASE_DINO_DURATION + _duration;
-    public void SetHeartValue(int _value) => curHeartValue = BASE_Heart_VALUE + _value;
-    public void SetMagnetDuration(float _duration) => curMagnetDuration = BASE_MAGNET_DURATION + _duration;
-    public void SetMagnetRange(int _range) => curMagnetRange = BASE_MAGNET_RANGE + _range;
-    public void SetItemDropInterval(float _interval) => curItemDropInterval = BASE_ITEM_DROP_INTERVAL - _interval;
-
+    public ItemModel GetItemModel(EItemType _itemType) => items[(int)_itemType];
+    public ItemModel SetItemModel(ItemModel _itemModel) => items[(int)_itemModel.itemType] = _itemModel;
+    
     public void SaveItemStatus()
     {
         //Todo 아이템 값 저장해주기
+    }
+
+    public void UpgradeItemValue(EItemType _itemType)
+    {
+        int type = (int)_itemType;
+
+        items[type].UpgradeItemValue();
+    }
+
+    public void UpgradeItemDuration(EItemType _itemType)
+    {
+        int type = (int)_itemType;
+
+        items[type].UpgradeItemDuration();
     }
 }

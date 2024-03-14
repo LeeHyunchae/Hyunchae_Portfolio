@@ -7,7 +7,8 @@ public enum EItemType
     HEART = 0,
     DINO = 1,
     MAGNET = 2,
-    END = 3
+    ITEM_DROP_INTERVAL = 3,
+    END
 }
 
 public class BaseItem

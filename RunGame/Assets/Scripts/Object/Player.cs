@@ -9,7 +9,8 @@ public enum EPlayerState
     WALK = 1,
     JUMPUP = 2,
     JUMPDOWN = 3,
-    DINO = 4
+    DINO = 4,
+    DINOEND = 5
 }
 
 public class Player

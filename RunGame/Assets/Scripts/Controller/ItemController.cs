@@ -36,7 +36,7 @@ public class ItemController
         CreateItems();
 
         itemManager = ItemManager.getInstance;
-        //itemDropInterval = itemManager.GetItemDropInterval;
+        itemDropInterval = itemManager.GetItemModel(EItemType.ITEM_DROP_INTERVAL).itemDuration;
         itemDropInterval = 10;
     }
     #region Init && CreateObstacleGameObject
@@ -68,7 +68,7 @@ public class ItemController
 
         itemParent.transform.position = Vector2.zero;
 
-        items = new BaseItem[ITEM_CAPACITY * (int)EItemType.END];
+        items = new BaseItem[ITEM_CAPACITY * (int)EItemType.ITEM_DROP_INTERVAL];
 
         CreateHeartItem();
         CreateDinoItem();
@@ -175,7 +175,7 @@ public class ItemController
         int halfPosCoin = (int)(_coins.Count * 0.5f);
 
         //int randomItem = Random.Range(0, (int)EItemType.END);
-        int randomItem = 2;
+        int randomItem = 1;
 
         BaseItem item;
 

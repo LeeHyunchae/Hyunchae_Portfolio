@@ -25,6 +25,7 @@ public class PlayerController
     private float curLongJumpPower = 0;
     private float curHitIgnoreTime = 0;
     private float curMagnetTime = 0;
+    private float curDinoTime = 0;
 
     private Floor curFloor;
     private float floorLandPosY;
@@ -56,7 +57,7 @@ public class PlayerController
     public void IncreasePlayerHP()
     {
         int playerHP = player.GetHP;
-        player.SetHP(playerHP++);
+        player.SetHP(++playerHP);
         OnIncreaseHP?.Invoke(player.GetHP);
     }
 
@@ -87,7 +88,7 @@ public class PlayerController
         {
             curMagnetTime += Time.deltaTime;
 
-            if (curMagnetTime > ItemManager.getInstance.GetMagnetDuration)
+            if (curMagnetTime > ItemManager.getInstance.GetItemModel(EItemType.MAGNET).itemDuration)
             {
                 curMagnetTime = 0;
                 isMagnet = false;
@@ -111,7 +112,16 @@ public class PlayerController
         CheckCoinAABB();
         CheckItemAABB();
 
-        if(isHit)
+        if (player.GetPlayerState == EPlayerState.DINO)
+        {
+            curDinoTime += Time.deltaTime;
+            if(curDinoTime > ItemManager.getInstance.GetItemModel(EItemType.DINO).itemDuration)
+            {
+                curDinoTime = 0;
+                ChangeState(EPlayerState.DINOEND);
+            }
+        }
+        else if (isHit)
         {
             curHitIgnoreTime += Time.deltaTime;
             if(curHitIgnoreTime >= HIT_IGNORE_TIME)
@@ -180,6 +190,11 @@ public class PlayerController
 
     private void ChangeState(EPlayerState _state)
     {
+        if(player.GetPlayerState == EPlayerState.DINO && _state != EPlayerState.DINOEND)
+        {
+            return;
+        }
+
         player.SetState(_state);
         PlayCurStateAnim(_state);
     }
@@ -215,6 +230,11 @@ public class PlayerController
         isMagnet = true;
     }
 
+    public void OnGetDino()
+    {
+        ChangeState(EPlayerState.DINO);
+    }
+
     private void CheckGroundAABB()
     {
         if(curShortJumpPower > 0 || curFloor == null)
@@ -223,7 +243,7 @@ public class PlayerController
             return;
         }
 
-        if(playerPos.y == floorLandPosY)
+        if (playerPos.y == floorLandPosY)
         {
             isGrounded = true;
             return;
@@ -313,7 +333,7 @@ public class PlayerController
             {
                 float distance = Vector2.Distance(coinPos, playerPos);
 
-                if(distance <= ItemManager.getInstance.GetMagnetRange)
+                if (distance <= ItemManager.getInstance.GetItemModel(EItemType.MAGNET).itemValue)
                 {
                     Vector2 direction = (playerPos - coinPos).normalized;
 
@@ -381,8 +401,8 @@ public class PlayerController
 
             if (playerRect.Overlaps(itemRect))
             {
-                item.SetActive(false);
                 item.OnGetItem(this);
+                item.SetActive(false);
             }
         }
     }

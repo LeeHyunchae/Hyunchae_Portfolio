@@ -8,7 +8,7 @@ public class MagnetItem : BaseItem
     {
         base.Init(_itemObj);
 
-        itemType = EItemType.DINO;
+        itemType = EItemType.MAGNET;
     }
 
     public override void OnGetItem(PlayerController _player)

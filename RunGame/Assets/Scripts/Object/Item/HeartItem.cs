@@ -8,13 +8,19 @@ public class HeartItem : BaseItem
     {
         base.Init(_itemObj);
 
-        itemType = EItemType.DINO;
+        itemType = EItemType.HEART;
     }
 
     public override void OnGetItem(PlayerController _player)
     {
         base.OnGetItem(_player);
 
-        _player.IncreasePlayerHP();
+        int healCount = ItemManager.getInstance.GetItemModel(this.GetItemType).itemValue;
+
+        for(int i = 0; i<healCount;i++)
+        {
+            _player.IncreasePlayerHP();
+        }
+
     }
 }

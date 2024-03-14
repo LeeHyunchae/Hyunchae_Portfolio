@@ -12,6 +12,7 @@ public class Singleton<T> where T : class, new()
             if (instance == null)
             {
                 instance = new T();
+                (instance as Singleton<T>).Initialize();
             }
 
             return instance;

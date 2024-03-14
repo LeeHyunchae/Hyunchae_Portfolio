@@ -2,22 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UIManager
+public class UIManager : Singleton<UIManager>
 {
-    private static UIManager uiManager;
-    public static UIManager instance
-    {
-        get
-        {
-            if (uiManager == null)
-            {
-                uiManager = new UIManager();
-            }
-
-            return uiManager;
-        }
-    }
-
     private Stack<UIBaseController> uiStack = new Stack<UIBaseController>();
     private List<UIBaseController> uiList = new List<UIBaseController>();
 
@@ -105,7 +91,7 @@ public class UIManager
 
     public T CreateUIPanel<T>(string _filePath) where T : UIBaseController
     {
-        T uiPanelCtrl = UnityEngine.Object.Instantiate(Resources.Load<T>(_filePath));
+        T uiPanelCtrl = UnityEngine.GameObject.Instantiate(Resources.Load<T>(_filePath));
         uiList.Add(uiPanelCtrl);
 
         return uiPanelCtrl;
