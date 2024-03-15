@@ -19,6 +19,7 @@ public class MainSceneController : MonoBehaviour
 
     private void OnClickGameStartBtn()
     {
+        UIManager.getInstance.UnloadScene();
         sceneCtrl.ChangeScene("InGameScene");
     }
 

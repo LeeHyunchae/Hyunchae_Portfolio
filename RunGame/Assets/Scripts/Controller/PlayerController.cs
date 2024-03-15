@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 public class PlayerController
 {
@@ -15,6 +16,9 @@ public class PlayerController
     private const string PLAYERPATH = "Prefabs/Player";
     private const float AABB_COLLECTION_VALUE = 0.25f;
     private const int PLAYER_MAX_HP = 10;
+    private const int DEAD_LINE = -10;
+
+    private ItemManager itemManager;
 
     private bool isGrounded;
     private bool isDoubleJump;
@@ -34,6 +38,8 @@ public class PlayerController
     private BaseItem[] items;
     private Vector2 playerPos;
     private int coinSpeed;
+    private Color hitColor = Color.gray;
+    private Color normalColor = Color.white;
 
     public Action<ECoinType> OnGetCoin;
     public Action<int> OnIncreaseHP;
@@ -44,6 +50,8 @@ public class PlayerController
     public void Init()
     {
         SetPlayer(GameObject.Instantiate<GameObject>((GameObject)Resources.Load(PLAYERPATH), Vector2.zero, Quaternion.identity));
+
+        itemManager = ItemManager.getInstance;
     }
     
     private void SetPlayer(GameObject _player)
@@ -88,7 +96,7 @@ public class PlayerController
         {
             curMagnetTime += Time.deltaTime;
 
-            if (curMagnetTime > ItemManager.getInstance.GetItemModel(EItemType.MAGNET).itemDuration)
+            if (curMagnetTime > itemManager.GetItemModel(EItemType.MAGNET).itemDuration)
             {
                 curMagnetTime = 0;
                 isMagnet = false;
@@ -115,7 +123,7 @@ public class PlayerController
         if (player.GetPlayerState == EPlayerState.DINO)
         {
             curDinoTime += Time.deltaTime;
-            if(curDinoTime > ItemManager.getInstance.GetItemModel(EItemType.DINO).itemDuration)
+            if(curDinoTime > itemManager.GetItemModel(EItemType.DINO).itemDuration)
             {
                 curDinoTime = 0;
                 ChangeState(EPlayerState.DINOEND);
@@ -128,6 +136,7 @@ public class PlayerController
             {
                 curHitIgnoreTime = 0;
                 isHit = false;
+                player.SetSpriteColor(normalColor);
             }
         }
         else
@@ -148,6 +157,12 @@ public class PlayerController
         if (curShortJumpPower < 0 && player.GetPlayerState != EPlayerState.JUMPDOWN)
         {
             ChangeState(EPlayerState.JUMPDOWN);
+        }
+
+        if(playerPos.y < DEAD_LINE)
+        {
+            player.SetHP(0);
+            OnDecreaseHP?.Invoke(player.GetHP);
         }
     }
 
@@ -195,6 +210,11 @@ public class PlayerController
             return;
         }
 
+        if(_state == EPlayerState.DINOEND)
+        {
+            int i = 0;
+        }
+
         player.SetState(_state);
         PlayCurStateAnim(_state);
     }
@@ -228,11 +248,23 @@ public class PlayerController
     public void OnGetMagnet()
     {
         isMagnet = true;
+        curDinoTime = 0.0f;
     }
 
     public void OnGetDino()
     {
         ChangeState(EPlayerState.DINO);
+
+        curHitIgnoreTime = 0;
+        isHit = false;
+        player.SetSpriteColor(normalColor);
+    }
+
+    private void OnPlayerHit()
+    {
+        isHit = true;
+        DecreasePlayerHP();
+        player.SetSpriteColor(hitColor);
     }
 
     private void CheckGroundAABB()
@@ -257,7 +289,7 @@ public class PlayerController
         Rect playerRect = new Rect(playerPos.x - PLAYERHALFSIZE, playerPos.y - PLAYERHALFSIZE + AABB_COLLECTION_VALUE, PLAYERSIZE, AABB_COLLECTION_VALUE);
         Rect floorRect = new Rect(floorPos.x - floorWidthHalf, floorPos.y + floorHeightHalf, curFloor.GetFloorWidth(), AABB_COLLECTION_VALUE);
 
-        floorRect.DrawDebugLine();
+        playerRect.DrawDebugLine();
 
         isGrounded = playerRect.Overlaps(floorRect);
 
@@ -292,12 +324,9 @@ public class PlayerController
 
             obstacleRect.Set(obstaclePos.x - obstacleWidthHalf , obstaclePos.y + obstacleHeightHalf, obstacle.GetWidth(), obstacle.GetHeight());
 
-            obstacleRect.DrawDebugLine();
-
             if (playerRect.Overlaps(obstacleRect))
             {
-                isHit = true;
-                DecreasePlayerHP();
+                OnPlayerHit();
                 return;
             }
         }
@@ -333,7 +362,7 @@ public class PlayerController
             {
                 float distance = Vector2.Distance(coinPos, playerPos);
 
-                if (distance <= ItemManager.getInstance.GetItemModel(EItemType.MAGNET).itemValue)
+                if (distance <= itemManager.GetItemModel(EItemType.MAGNET).itemValue)
                 {
                     Vector2 direction = (playerPos - coinPos).normalized;
 
@@ -351,8 +380,6 @@ public class PlayerController
             float coinRectHeight = coin.GetHeight() - AABB_COLLECTION_VALUE * 2;
 
             coinRect.Set(coinRectX, coinRectY, coinRectWidth, coinRectHeight);
-
-            coinRect.DrawDebugLine();
 
             if(playerRect.Overlaps(coinRect))
             {
@@ -396,8 +423,6 @@ public class PlayerController
             float itemRectHeight = item.GetHeight();
 
             itemRect.Set(itemRectX, itemRectY, itemRectWidth, itemRectHeight);
-
-            itemRect.DrawDebugLine();
 
             if (playerRect.Overlaps(itemRect))
             {

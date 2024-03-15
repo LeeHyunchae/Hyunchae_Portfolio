@@ -1,26 +1,35 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 
 public class ShopPanelController : UIBaseController
 {
+    [SerializeField] private TextMeshProUGUI goldText;
     [SerializeField] private UpgradeButtonElement originBtn;
     [SerializeField] private Transform upgradeBtnParent;
     [SerializeField] private Button CloseBtn;
+
+    private const string GOLD = "GOLD : ";
 
     private List<UpgradeButtonElement> buttonElements;
     private Button[] upgradeBtns;
     private ItemManager itemManager;
     private int buttonCount = 0;
+    private ScoreManager scoreManager;
 
     public override void Init()
     {
         base.Init();
 
         itemManager = ItemManager.getInstance;
+        scoreManager = ScoreManager.getInstance;
+
         buttonElements = new List<UpgradeButtonElement>();
+
+        RefreshGoldText();
 
         InitBtnData();
 
@@ -111,17 +120,32 @@ public class ShopPanelController : UIBaseController
         ButtonData buttonData = buttonElements[_btnIdx].GetButtonData;
         ItemModel item = itemManager.GetItemModel(buttonData.itemType);
 
+        int curGold = scoreManager.GetGold;
+
+
         if (buttonData.isValueUpgradeBtn)
         {
-            itemManager.UpgradeItemValue(buttonData.itemType);
-            buttonElements[_btnIdx].SetInfoText(item.itemValueInfo + item.itemValue);
-            buttonElements[_btnIdx].SetCostText(item.itemValueCost.ToString());
+            if(curGold >= item.itemValueCost)
+            {
+                scoreManager.UseGold(item.itemValueCost);
+                RefreshGoldText();
+
+                itemManager.UpgradeItemValue(buttonData.itemType);
+                buttonElements[_btnIdx].SetInfoText(item.itemValueInfo + item.itemValue);
+                buttonElements[_btnIdx].SetCostText(item.itemValueCost.ToString());
+            }
         }
         else
         {
-            itemManager.UpgradeItemDuration(buttonData.itemType);
-            buttonElements[_btnIdx].SetInfoText(item.itemDurationInfo + item.itemDuration);
-            buttonElements[_btnIdx].SetCostText(item.itemDurationCost.ToString());
+            if(curGold >= item.itemDurationCost)
+            {
+                scoreManager.UseGold(item.itemDurationCost);
+                RefreshGoldText();
+
+                itemManager.UpgradeItemDuration(buttonData.itemType);
+                buttonElements[_btnIdx].SetInfoText(item.itemDurationInfo + item.itemDuration);
+                buttonElements[_btnIdx].SetCostText(item.itemDurationCost.ToString());
+            }
         }
     }
 
@@ -130,4 +154,8 @@ public class ShopPanelController : UIBaseController
         UIManager.getInstance.Hide();
     }
 
+    private void RefreshGoldText()
+    {
+        goldText.text = GOLD + scoreManager.GetGold;
+    }
 }

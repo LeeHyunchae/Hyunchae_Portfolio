@@ -4,27 +4,79 @@ using UnityEngine;
 
 public class ScoreManager : Singleton<ScoreManager>
 {
-    private int totalScore;
+    private const float GOLD_CORRECTION = 0.5f;
+    private const string HIGH_SCORE = "HighScore";
+    private const string GOLD = "Gold";
+
+    private int curScore;
     private int highScore;
-
-    public int GetTotalScore => totalScore;
-
-    public void PlusScore(int _value) => totalScore += _value;
-
-    public void MinusScore(int _value) => totalScore -= _value;
+    private bool isHighScore;
+    private int gold;
 
     public int GetHighScore => highScore;
 
+    public int GetScore => curScore;
+
+    public bool GetIsHighScore => isHighScore;
+
+    public int GetGold => gold;
+
+    public override bool Initialize()
+    {
+        base.Initialize();
+
+        LoadData();
+
+        return true;
+    }
 
     public void SetScore(int _score)
     {
         if(_score > highScore)
         {
             highScore = _score;
+            isHighScore = true;
+
+            SaveHighScore();
+        }
+        else
+        {
+            isHighScore = false;
         }
 
-        PlusScore(_score);
+        curScore = _score;
+        SetGold(_score);
     }
 
-    // Todo 저장 및 불러오기 기능 필요할듯
+    public void SetGold(int _score)
+    {
+        gold += (int)(_score * GOLD_CORRECTION);
+
+        SaveGold();
+    }
+    
+    public int UseGold(int _cost)
+    {
+        gold -= _cost;
+
+        SaveGold();
+
+        return GetGold;
+    }
+
+    private void SaveGold()
+    {
+        PlayerPrefs.SetInt(GOLD, gold);
+    }
+
+    private void SaveHighScore()
+    {
+        PlayerPrefs.SetInt(HIGH_SCORE, highScore);
+    }
+
+    private void LoadData()
+    {
+        highScore = PlayerPrefs.GetInt(HIGH_SCORE);
+        gold = PlayerPrefs.GetInt(GOLD);
+    }
 }

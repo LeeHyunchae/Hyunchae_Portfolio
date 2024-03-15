@@ -8,8 +8,6 @@ public class ItemManager : Singleton<ItemManager>
 
     public ItemModel[] GetItems => items;
 
-    // Todo 저장 및 불러오기 기능
-
     public override bool Initialize()
     {
         base.Initialize();
@@ -20,18 +18,16 @@ public class ItemManager : Singleton<ItemManager>
         return true;
     }
 
-    private void LoadItemStatus()
+    private void InitItemData()
     {
-        //Todo 불러오기로 세팅, 테이블 화
-
         int count = (int)EItemType.END;
 
-        for(int i = 0; i<count; i++)
+        for (int i = 0; i < count; i++)
         {
             items[i] = new ItemModel();
         }
 
-        int typeNum = (int)EItemType.HEART;
+            int typeNum = (int)EItemType.HEART;
 
         items[typeNum].itemType = (EItemType)typeNum;
         items[typeNum].itemValueLevel = 0;
@@ -82,7 +78,7 @@ public class ItemManager : Singleton<ItemManager>
         items[typeNum].itemValueLevel = 0;
         items[typeNum].itemDurationLevel = 0;
         items[typeNum].baseItemValue = 0;
-        items[typeNum].baseitemDuration = 15;
+        items[typeNum].baseitemDuration = 20;
         items[typeNum].itemValue_IncreaseValue = 0;
         items[typeNum].itemDuration_InceaseValue = -0.5f;
         items[typeNum].valueLevelUp_CostInceaseValue = 0;
@@ -90,14 +86,51 @@ public class ItemManager : Singleton<ItemManager>
         items[typeNum].itemValueInfo = null;
         items[typeNum].itemDurationInfo = "아이템 등장 시간 감소";
         items[typeNum].InitData();
+
+        SaveAllItemStatus();
+    }
+
+    private void LoadItemStatus()
+    {
+        int count = (int)EItemType.END;
+
+        for (int i = 0; i < count; i++)
+        {
+            string json = PlayerPrefs.GetString(((EItemType)i).ToString());
+
+            if (json == string.Empty)
+            {
+                InitItemData();
+                return;
+            }
+            else
+            {
+                items[i] = new ItemModel();
+                items[i] = JsonUtility.FromJson<ItemModel>(json);
+            }
+        }
     }
 
     public ItemModel GetItemModel(EItemType _itemType) => items[(int)_itemType];
     public ItemModel SetItemModel(ItemModel _itemModel) => items[(int)_itemModel.itemType] = _itemModel;
     
-    public void SaveItemStatus()
+    public void SaveAllItemStatus()
     {
-        //Todo 아이템 값 저장해주기
+        int count = (int)EItemType.END;
+
+        for(int i = 0; i < count; i++)
+        {
+            string jsonItem = JsonUtility.ToJson(items[i]);
+
+            PlayerPrefs.SetString(items[i].itemType.ToString(), jsonItem);
+        }
+    }
+
+    public void SaveItemStatus(EItemType _itemType)
+    {
+        string jsonItem = JsonUtility.ToJson(items[(int)_itemType]);
+        PlayerPrefs.SetString(items[(int)_itemType].itemType.ToString(), jsonItem);
+
     }
 
     public void UpgradeItemValue(EItemType _itemType)
@@ -105,6 +138,7 @@ public class ItemManager : Singleton<ItemManager>
         int type = (int)_itemType;
 
         items[type].UpgradeItemValue();
+        SaveItemStatus(_itemType);
     }
 
     public void UpgradeItemDuration(EItemType _itemType)
@@ -112,5 +146,6 @@ public class ItemManager : Singleton<ItemManager>
         int type = (int)_itemType;
 
         items[type].UpgradeItemDuration();
+        SaveItemStatus(_itemType);
     }
 }

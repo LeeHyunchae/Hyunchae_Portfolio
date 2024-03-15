@@ -21,6 +21,7 @@ public class Player
     private EPlayerState state;
     private int playerHP;
     private Transform playerTM;
+    private SpriteRenderer sprite;
 
     public Transform GetTranstorm => playerTM;
     public EPlayerState GetPlayerState => state;
@@ -31,6 +32,7 @@ public class Player
     public void Init(GameObject _playerObj)
     {
         anim = _playerObj.GetComponent<Animator>();
+        sprite = _playerObj.GetComponent<SpriteRenderer>();
         state = EPlayerState.IDLE;
 
         playerTM = _playerObj.GetComponent<Transform>();
@@ -49,5 +51,10 @@ public class Player
     public void SetPosition(Vector2 _pos)
     {
         playerTM.position = _pos;
+    }
+
+    public void SetSpriteColor(Color _color)
+    {
+        sprite.color = _color;
     }
 }

@@ -12,21 +12,24 @@ public class InGameSceneController : MonoBehaviour
 
     private const string SCORE = "Score : ";
     private const int BASE_COIN_SPEED = 5;
-    //private const float SPEED_TO_SCORE_MAGNIFICATION = 0.2f;
-    private float playerScore = 0;
+    private const int MIN_GAME_SPEED = 5;
+    private const int MAX_GAME_SPEED = 15;
+    private const int SPEED_INCREASE_INTERVAL = 5;
 
-    private ItemManager itemManager;
+    private float playerScore = 0;
+    private float curGameSpeedTime = 0;
+
     private ScoreManager scoreManager;
     private PlayerController playerCtrl;
     private FloorController floorCtrl;
     private ObstacleController obstacleCtrl;
     private CoinController coinCtrl;
     private ItemController itemCtrl;
-    private int curGameSpeed = 5;
+    private int curGameSpeed;
     private float flyObstacleInterval = 3f;
     private Camera mainCam;
 
-    private bool isPlay = false;
+    private bool isPlay = true;
 
     private float screenLeft;
     private float screenRight;
@@ -38,16 +41,9 @@ public class InGameSceneController : MonoBehaviour
         screenLeft = mainCam.ScreenToWorldPoint(new Vector3(0, 0, 0)).x;
         screenRight = mainCam.ScreenToWorldPoint(new Vector3(Screen.width, 0, 0)).x;
 
-        itemManager = ItemManager.getInstance;
-
-        Debug.Log(itemManager.GetItemModel(EItemType.HEART).itemValue);
-        Debug.Log(itemManager.GetItemModel(EItemType.DINO).itemDuration);
-        Debug.Log(itemManager.GetItemModel(EItemType.MAGNET).itemValue);
-        Debug.Log(itemManager.GetItemModel(EItemType.MAGNET).itemDuration);
-        Debug.Log(itemManager.GetItemModel(EItemType.ITEM_DROP_INTERVAL).itemDuration);
-
-
         scoreManager = ScoreManager.getInstance;
+
+        curGameSpeed = MIN_GAME_SPEED;
 
         InitPlayerCtrl();
         InitObstacleCtrl();
@@ -122,19 +118,22 @@ public class InGameSceneController : MonoBehaviour
     private void Update()
     {
         //게임 일시정지
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            isPlay = !isPlay;
-            jumpBtn.SetEnable(isPlay);
-        }
-
         if (!isPlay)
         {
             return;
         }
 
-        //playerScore += curGameSpeed * SPEED_TO_SCORE_MAGNIFICATION * Time.deltaTime;
-        //scoreText.text = SCORE + (int)playerScore;
+        if(curGameSpeed != MAX_GAME_SPEED)
+        {
+            curGameSpeedTime += Time.deltaTime;
+
+            if(curGameSpeedTime > SPEED_INCREASE_INTERVAL)
+            {
+                curGameSpeedTime = 0;
+                curGameSpeed++;
+                SetSpeedRate();
+            }
+        }
 
         playerCtrl.Update();
         floorCtrl.Update();
@@ -142,17 +141,6 @@ public class InGameSceneController : MonoBehaviour
         coinCtrl.Update();
         itemCtrl.Update();
 
-        //시간 경과에 따라 || 플레이어 피격 상황
-        if(Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            curGameSpeed++;
-            SetSpeedRate();
-        }
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            curGameSpeed--;
-            SetSpeedRate();
-        }
     }
 
     private void SetSpeedRate()
@@ -209,11 +197,12 @@ public class InGameSceneController : MonoBehaviour
 
     private void OnDecreaseHP(int _hp)
     {
-        if(_hp < 0)
+        if (_hp <= 0)
         {
             //게임 종료
-
+            isPlay = false;
             scoreManager.SetScore((int)playerScore);
+            UIManager.getInstance.Show<GameOverPanel>("Prefabs/UI/GameOverPanel");
             return;
         }
 

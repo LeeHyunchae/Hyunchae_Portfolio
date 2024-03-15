@@ -139,6 +139,11 @@ public class FloorController
         floorPos.x = floors[lastFloorIdx].GetTransform.position.x + floors[lastFloorIdx].GetFloorWidth() * 0.5f + randomDistance + floors[_index].GetFloorWidth() * 0.5f;
         floorPos.y = Random.Range(MIN_FLOOR_HEIGHT, MAX_FLOOR_HEIGHT);
 
+        while(floorPos.y == floors[lastFloorIdx].GetTransform.position.y)
+        {
+            floorPos.y = Random.Range(MIN_FLOOR_HEIGHT, MAX_FLOOR_HEIGHT);
+        }
+
         floors[_index].GetTransform.position = floorPos;
 
         floors[_index].SetPrevFloorPos(floors[lastFloorIdx].GetTransform.position,randomDistance);
@@ -153,13 +158,6 @@ public class FloorController
 
     private bool CheckFrontFloor(int _idx)
     {
-        int curFloorIdx = (_idx + 1) % floorCount;
-
-        if(frontFloorIdx == curFloorIdx)
-        {
-            return false;
-        }
-
         return floors[_idx].GetTransform.position.x + floors[_idx].GetFloorWidth() * 0.5f + playerHalfSize <= Vector2.zero.x;
     }
 

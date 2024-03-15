@@ -161,7 +161,7 @@ GameObject:
   - component: {fileID: 2643425932250795839}
   - component: {fileID: 2357887418296604506}
   m_Layer: 5
-  m_Name: Gold
+  m_Name: GoldText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -653,6 +653,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93e0be7084da9458bbab72309eebbf6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  goldText: {fileID: 2357887418296604506}
   originBtn: {fileID: 7243168898900008317, guid: 7ea9d50da6b514788bbdb98c4f91bfc3, type: 3}
   upgradeBtnParent: {fileID: 5742687386835687899}
   CloseBtn: {fileID: 1450298372582362422}
