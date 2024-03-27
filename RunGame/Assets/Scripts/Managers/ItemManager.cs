@@ -38,7 +38,7 @@ public class ItemManager : Singleton<ItemManager>
         items[typeNum].baseitemDuration = 0;
         items[typeNum].itemDuration_InceaseValue = 0;
         items[typeNum].durationLevelUp_CostInceaseValue = 0;
-        items[typeNum].itemValueInfo = "체력 회복량 상승";
+        items[typeNum].itemValueInfo = "체력 회복량 상승 : ";
         items[typeNum].itemDurationInfo = null;
         items[typeNum].InitData();
 
@@ -54,7 +54,7 @@ public class ItemManager : Singleton<ItemManager>
         items[typeNum].itemDuration_InceaseValue = 0.5f;
         items[typeNum].durationLevelUp_CostInceaseValue = 300;
         items[typeNum].itemValueInfo = null;
-        items[typeNum].itemDurationInfo = "변신 지속시간 상승";
+        items[typeNum].itemDurationInfo = "변신 지속시간 상승 : ";
         items[typeNum].InitData();
 
         typeNum = (int)EItemType.MAGNET;
@@ -68,8 +68,8 @@ public class ItemManager : Singleton<ItemManager>
         items[typeNum].itemDuration_InceaseValue = 0.5f;
         items[typeNum].valueLevelUp_CostInceaseValue = 500;
         items[typeNum].durationLevelUp_CostInceaseValue = 300;
-        items[typeNum].itemValueInfo = "자석 범위 상승";
-        items[typeNum].itemDurationInfo = "자석 지속시간 상승";
+        items[typeNum].itemValueInfo = "자석 범위 상승 : ";
+        items[typeNum].itemDurationInfo = "자석 지속시간 상승 : ";
         items[typeNum].InitData();
 
         typeNum = (int)EItemType.ITEM_DROP_INTERVAL;
@@ -84,7 +84,7 @@ public class ItemManager : Singleton<ItemManager>
         items[typeNum].valueLevelUp_CostInceaseValue = 0;
         items[typeNum].durationLevelUp_CostInceaseValue = 500;
         items[typeNum].itemValueInfo = null;
-        items[typeNum].itemDurationInfo = "아이템 등장 시간 감소";
+        items[typeNum].itemDurationInfo = "아이템 등장 시간 감소 : ";
         items[typeNum].InitData();
 
         SaveAllItemStatus();
