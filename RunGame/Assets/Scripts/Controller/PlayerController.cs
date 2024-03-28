@@ -289,7 +289,7 @@ public class PlayerController
         Rect playerRect = new Rect(playerPos.x - PLAYERHALFSIZE, playerPos.y - PLAYERHALFSIZE + AABB_COLLECTION_VALUE, PLAYERSIZE, AABB_COLLECTION_VALUE);
         Rect floorRect = new Rect(floorPos.x - floorWidthHalf, floorPos.y + floorHeightHalf, curFloor.GetFloorWidth(), AABB_COLLECTION_VALUE);
 
-        // 플레이어 발판 및 땅 디버그라인 그리기
+        // for Debug RectLine
         //playerRect.DrawDebugLine();
         //floorRect.DrawDebugLine();
 
